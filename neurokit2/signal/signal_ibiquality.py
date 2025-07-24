@@ -63,16 +63,6 @@ def signal_ibiquality(signal, signal_type, primary_detector=None, secondary_dete
     
     """
 
-    # Sanitize inputs
-    signal_type = signal_type.lower()  # remove capitalised letters
-    primary_detector = primary_detector.lower()  # remove capitalised letters
-    secondary_detector = secondary_detector.lower()  # remove capitalised letters
-    signal = np.asarray(signal)
-
-    # check that signal_type is either "ecg" or "ppg"
-    if signal_type not in ["ecg", "ppg"]:
-        raise ValueError("`signal_type` must be 'ecg' or 'ppg'.")
-
     # Specify default beat detectors
     if primary_detector is None:
         if signal_type == "ecg":
@@ -84,6 +74,16 @@ def signal_ibiquality(signal, signal_type, primary_detector=None, secondary_dete
             secondary_detector = "neurokit"
         elif signal_type == "ppg":
             secondary_detector = "elgendi"
+
+    # Sanitize inputs
+    signal_type = signal_type.lower()  # remove capitalised letters
+    primary_detector = primary_detector.lower()  # remove capitalised letters
+    secondary_detector = secondary_detector.lower()  # remove capitalised letters
+    signal = np.asarray(signal)
+
+    # check that signal_type is either "ecg" or "ppg"
+    if signal_type not in ["ecg", "ppg"]:
+        raise ValueError("`signal_type` must be 'ecg' or 'ppg'.")
 
     # Specify constants
     tolerance_ms = 150 # tolerance window size, in milliseconds
