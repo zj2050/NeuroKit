@@ -104,7 +104,7 @@ def _segment_plot(cycles, cyclerate=0, signal_name="signal", color="#F44336", ax
     if ax is None:
         _, ax = plt.subplots()
     signal_name = signal_name.lower()
-    if signal_name in ["ecg","ppg"]:
+    if signal_name in ["ecg", "ppg"]:
         cycle_name = "beat"
         rate_name = "heart rate"
         rate_unit = "bpm"

@@ -52,6 +52,13 @@ def rsp_segment(rsp_cleaned, peaks=None, sampling_rate=1000, show=False, **kwarg
     if len(rsp_cleaned) < sampling_rate * 10:
         raise ValueError("The data length is too small to be segmented.")
 
-    breaths, average_rr = signal_cyclesegment(rsp_cleaned, peaks, sampling_rate=sampling_rate, show=show, signal_name="rsp")
+    output = signal_cyclesegment(rsp_cleaned, peaks, sampling_rate=sampling_rate, show=show, signal_name="rsp", **kwargs)
+
+    # if an axes object is requested
+    if show == "return":
+        return output
+    
+    # else extract breaths
+    breaths, _ = output
 
     return breaths
