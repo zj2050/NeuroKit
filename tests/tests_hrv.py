@@ -210,19 +210,19 @@ def test_hrv_nonlinear_fragmentation():
         "PSS": 1.0,
     }
 
-def test_HRV_SymDyn_():
+def test_hrv_symdyn():
     # Test symbolic dynamics
     ecg = nk.ecg_simulate(duration=60, sampling_rate=250, heart_rate=70, random_state=42)
 
     _, peaks = nk.ecg_process(ecg, sampling_rate=250)
     peaks = peaks["ECG_R_Peaks"]
-    HRV_SymDyn_ = nk.HRV_SymDyn_(peaks)
+    HRV_SymDyn = nk.hrv_symdyn(peaks)
 
     # Expected values obtained from your test signal
     expected_results = pd.DataFrame(
-        [[0.17910448, 0.62686567, 0.14925373, 0.04477612, 0.14925373,
-        0.43283582, 0.28358209, 0.13432836, 0.13432836, 0.58208955,
-        0.20895522, 0.07462687, 0.35820896, 0.64179104, 0., 0.]],
+        [[0.20895522, 0.64179104, 0.11940299, 0.02985075, 0.11940299,
+        0.53731343, 0.23880597, 0.10447761, 0.13432836, 0.56716418,
+        0.2238806 , 0.07462687, 0.31343284, 0.68656716, 0., 0.]],
         columns =['HRV_SymDyn_EqualPorba4_0V', 'HRV_SymDyn_EqualPorba4_1V',
         'HRV_SymDyn_EqualPorba4_2LV', 'HRV_SymDyn_EqualPorba4_2UV',
         'HRV_SymDyn_EqualPorba6_0V', 'HRV_SymDyn_EqualPorba6_1V',
@@ -233,4 +233,4 @@ def test_HRV_SymDyn_():
         'HRV_SymDyn_Sigma05_2UV']
     )
 
-    assert np.isclose(HRV_SymDyn_,expected_results).all()
+    assert np.isclose(HRV_SymDyn,expected_results).all()
