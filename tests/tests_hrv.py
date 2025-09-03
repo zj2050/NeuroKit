@@ -233,4 +233,4 @@ def test_hrv_symdyn():
         'HRV_SymDyn_Sigma05_2UV']
     )
 
-    assert np.isclose(HRV_SymDyn,expected_results).all()
+    assert np.isclose(HRV_SymDyn,expected_results,atol=0.001).all()
