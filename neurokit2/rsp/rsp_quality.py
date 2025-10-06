@@ -2,7 +2,7 @@
 
 import scipy.signal
 from .rsp_peaks import rsp_peaks
-from ..signal.signal_templatequality import signal_templatequality
+from ..signal.signal_quality import signal_quality
 
 
 def rsp_quality(rsp_cleaned, peaks=None, sampling_rate=1000, method="templatematch"):
@@ -18,6 +18,12 @@ def rsp_quality(rsp_cleaned, peaks=None, sampling_rate=1000, method="templatemat
       breath shape. Note that for pre-processing, Charlton et al. cleaned the signal with a low-pass filter
       below 1 Hz (the "charlton2021" method in rsp_clean), and used the "bettermann1996" breath detection
       algorithm (the "bettermann1996" method in rsp_peaks).
+
+    * The ``"disimilarity"`` method (borrowed from Sabeti et al., 2019, who proposed it for the PPG signal)
+      computes a continuous index of quality of the RSP signal, by calculating the level of disimilarity between
+      each individual breath and an average (template) breath shape (after they are normalised). A value of
+      zero indicates no disimilarity (i.e. equivalent breath shapes), whereas values above or below
+      indicate increasing disimilarity.
 
     Parameters
     ----------
@@ -44,6 +50,8 @@ def rsp_quality(rsp_cleaned, peaks=None, sampling_rate=1000, method="templatemat
     ----------
     * Charlton, P.H, et al. (2021). An impedance pneumography signal quality index: Design, assessment
       and application to respiratory rate monitoring. Biomedical Signal Processing and Control, 65, 102339.
+    * Sabeti E. et al. (2019). Signal quality measure for pulsatile physiological signals using morphological features:
+      Applications in reliability measure for pulse oximetry. Informatics in Medicine Unlocked, 16, 100222.
 
     Examples
     --------
@@ -68,8 +76,10 @@ def rsp_quality(rsp_cleaned, peaks=None, sampling_rate=1000, method="templatemat
     method = method.lower()  # remove capitalised letters
 
     # Sanitise method name
-    if method.lower() in ["templatematch", "charlton2021", "charlton"]:
+    if method in ["templatematch", "charlton2021", "charlton"]:
         method = "templatematch"
+    elif method in ["disimilarity", "sabeti2019"]:
+        method = "disimilarity"
     else:
         raise ValueError(
             f"Method '{method}' not recognised. Please use 'templatematch'."
@@ -81,15 +91,17 @@ def rsp_quality(rsp_cleaned, peaks=None, sampling_rate=1000, method="templatemat
         # Pre-process: Invert and detrend signal
         rsp_cleaned = -1 * scipy.signal.detrend(rsp_cleaned)
 
+    if method in ["templatematch", "disimilarity"]:
+
         # Detect RSP peaks (if not done already)
         if peaks is None:
             _, peaks = rsp_peaks(rsp_cleaned, sampling_rate=sampling_rate, method="bettermann1996")
             peaks = peaks["RSP_Peaks"]
 
     # Run signal quality assessment
-    quality = signal_templatequality(
+    quality = signal_quality(
         rsp_cleaned,
-        beat_inds=peaks,
+        cycle_inds=peaks,
         signal_type="rsp",
         sampling_rate=sampling_rate,
         method=method,

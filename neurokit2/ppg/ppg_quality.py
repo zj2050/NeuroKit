@@ -1,8 +1,7 @@
 # - * - coding: utf-8 - * -
 
 from .ppg_peaks import ppg_peaks
-from ..signal.signal_templatequality import signal_templatequality
-from ..signal.signal_ibiquality import signal_ibiquality
+from ..signal.signal_quality import signal_quality
 
 
 def ppg_quality(ppg_cleaned, peaks=None, sampling_rate=1000, method="templatematch"):
@@ -74,10 +73,11 @@ def ppg_quality(ppg_cleaned, peaks=None, sampling_rate=1000, method="templatemat
     .. ipython:: python
 
       import neurokit2 as nk
-
-      ppg = nk.ppg_simulate(duration=30, sampling_rate=300, heart_rate=80)
-      ppg_cleaned = nk.ppg_clean(ppg, sampling_rate=300)
-      quality = nk.ppg_quality(ppg_cleaned, sampling_rate=300, method="templatematch")
+      
+      sampling_rate = 100
+      ppg = nk.ppg_simulate(duration=30, sampling_rate=sampling_rate, heart_rate=80)
+      ppg_cleaned = nk.ppg_clean(ppg, sampling_rate=sampling_rate)
+      quality = nk.ppg_quality(ppg_cleaned, sampling_rate=sampling_rate, method="templatematch")
 
       @savefig p_ppg_quality.png scale=100%
       nk.signal_plot([ppg_cleaned, quality], standardize=True)
@@ -98,8 +98,8 @@ def ppg_quality(ppg_cleaned, peaks=None, sampling_rate=1000, method="templatemat
         method = "templatematch"
     elif method in ["disimilarity", "sabeti2019"]:
         method = "disimilarity"
-    elif method in ["ho2025", "ho"]:
-        method = "ho2025"
+    elif method in ["ho2025", "ho", "ibi"]:
+        method = "ibi"
     else:
         raise ValueError(
             f"Method '{method}' not recognised. Please use 'templatematch', 'disimilarity', or 'ho2025'."
@@ -107,21 +107,22 @@ def ppg_quality(ppg_cleaned, peaks=None, sampling_rate=1000, method="templatemat
 
     # Run 'templatematch' and 'disimilarity' methods
     if method in ["templatematch", "disimilarity"]:
-        quality = signal_templatequality(
+        quality = signal_quality(
             ppg_cleaned,
-            beat_inds=peaks,
+            cycle_inds=peaks,
             signal_type="ppg",
             sampling_rate=sampling_rate,
             method=method,
         )
-    elif method=="ho2025":
+    elif method=="ibi":
         # Assess quality using Ho2025 method (IBI accuracy prediction)
-        quality = signal_ibiquality(
+        quality = signal_quality(
             ppg_cleaned, 
             signal_type="ppg",
             primary_detector="charlton",
             secondary_detector="elgendi",
             sampling_rate=sampling_rate,
+            method="ibi",
         )
 
     return quality
