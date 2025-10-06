@@ -26,7 +26,7 @@ def rsp_findpeaks(
         The sampling frequency of :func:`.rsp_cleaned` (in Hz, i.e., samples/second).
     method : str
         The processing pipeline to apply. Can be one of ``"khodadad2018"`` (default), ``"scipy"``,
-        ``"biosppy"``, or ``"schafer2008"``.
+        ``"biosppy"``, or ``"bettermann1996"``.
     amplitude_min : float
         Only applies if method is ``"khodadad2018"``. Extrema that have a vertical distance smaller
         than(outlier_threshold * average vertical distance) to any direct neighbour are removed as
@@ -90,11 +90,11 @@ def rsp_findpeaks(
             peak_distance=peak_distance,
             peak_prominence=peak_prominence,
         )
-    elif method in ["schafer", "schafer2008"]:
-        info = _rsp_findpeaks_schafer(cleaned)
+    elif method in ["bettermann", "bettermann1996"]:
+        info = _rsp_findpeaks_bettermann(cleaned)
     else:
         raise ValueError(
-            "NeuroKit error: rsp_findpeaks(): 'method' should be one of 'khodadad2018', 'scipy', 'biosppy', or 'schafer2008'."
+            "NeuroKit error: rsp_findpeaks(): 'method' should be one of 'khodadad2018', 'scipy', 'biosppy', or 'bettermann1996'."
         )
 
     return info
@@ -122,8 +122,11 @@ def _rsp_findpeaks_biosppy(rsp_cleaned, sampling_rate):
     return info
 
 
-def _rsp_findpeaks_schafer(rsp_cleaned):
-    """Respiratory peak and trough detection based on Schafer et al. (2008)
+def _rsp_findpeaks_bettermann(rsp_cleaned):
+    """Respiratory peak and trough detection based on Bettermann et al. (1996)
+    https://doi.org/10.1515/bmte.1996.41.11.319
+    
+    As described in Schafer et al. (2008)
     https://doi.org/10.1007/s10439-007-9428-1
     
     Based on Charlton's MATLAB implementation at:
