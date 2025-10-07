@@ -85,6 +85,10 @@ def signal_period(
             "Too few peaks detected to compute the rate. Returning empty vector.",
             category=NeuroKitWarning,
         )
+        # insert desired_length if not provided:
+        if desired_length is None:
+            desired_length = len(peaks)
+        
         return np.full(desired_length, np.nan)
 
     if isinstance(desired_length, (int, float)):
