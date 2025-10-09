@@ -10,7 +10,13 @@ from ..signal import signal_fillmissing, signal_filter
 def ppg_clean(ppg_signal, sampling_rate=1000, heart_rate=None, method="elgendi"):
     """**Clean a photoplethysmogram (PPG) signal**
 
-    Prepare a raw PPG signal for systolic peak detection.
+    Clean a raw PPG signal for analysis by filtering to remove noise. This improves the accuracy of subsequent analyses, 
+    such as systolic peak detection.
+
+    * ``'elgendi'`` (default): Bandpass filter the signal between 0.5 and 8 Hz using a Butterworth filter.
+    * ``'nabian2018'`` (default): Lowpass filter the signal below 40 Hz. If `heart_rate` is provided then the function
+      checks whether 40 Hz is at least 10 times the cardiac frequency and less than half of the sampling frequency, and
+      raises an error if not.
 
     Parameters
     ----------
@@ -20,11 +26,10 @@ def ppg_clean(ppg_signal, sampling_rate=1000, heart_rate=None, method="elgendi")
         The heart rate of the PPG signal. Applicable only if method is ``"nabian2018"`` to check
         that filter frequency is appropriate.
     sampling_rate : int
-        The sampling frequency of the PPG (in Hz, i.e., samples/second). The default is 1000.
+        The sampling frequency of ``ppg_signal`` (in Hz, i.e., samples/second). The default is 1000.
     method : str
-        The processing pipeline to apply. Can be one of ``"elgendi"``, ``"nabian2018"``, or ``"none"``.
-        The default is ``"elgendi"``. If ``"none"`` is passed, the raw signal will be returned without
-        any cleaning.
+        The processing pipeline to apply. Can be one of ``"elgendi"`` (default), ``"nabian2018"``, or ``"none"``.
+        If ``"none"`` is passed, the raw signal will be returned without any cleaning.
 
     Returns
     -------
