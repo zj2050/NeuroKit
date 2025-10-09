@@ -376,14 +376,6 @@ def _signal_filter_missing(signal):
 # =============================================================================
 
 
-def _signal_filter_butterworth(signal, sampling_rate=1000, lowcut=None, highcut=None, order=5):
-    """Filter a signal using IIR Butterworth SOS method."""
-    freqs, filter_type = _signal_filter_sanitize(lowcut=lowcut, highcut=highcut, sampling_rate=sampling_rate)
-    sos = scipy.signal.butter(order, freqs, btype=filter_type, output="sos", fs=sampling_rate)
-    filtered = scipy.signal.sosfiltfilt(sos, signal)
-    return filtered
-
-
 def _signal_filter_chebyshevii(signal, sampling_rate=1000, lowcut=None, highcut=None, order=5):
     """Filter a signal using IIR Chebyshev Type II SOS method."""
     freqs, filter_type = _signal_filter_sanitize(lowcut=lowcut, highcut=highcut, sampling_rate=sampling_rate)
