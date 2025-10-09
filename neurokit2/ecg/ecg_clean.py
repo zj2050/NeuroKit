@@ -6,7 +6,7 @@ import pandas as pd
 import scipy.signal
 
 from ..misc import NeuroKitWarning, as_vector
-from ..signal import signal_filter
+from ..signal import signal_fillmissing, signal_filter
 
 
 def ecg_clean(ecg_signal, sampling_rate=1000, method="neurokit", **kwargs):
@@ -20,12 +20,13 @@ def ecg_clean(ecg_signal, sampling_rate=1000, method="neurokit", **kwargs):
     * ``'biosppy'``: Method used in the BioSPPy package. A FIR filter ([0.67, 45] Hz; order = 1.5 *
       SR). The 0.67 Hz cutoff value was selected based on the fact that there are no morphological
       features below the heartrate (assuming a minimum heart rate of 40 bpm).
-    * ``'pantompkins1985'``: Method used in Pan & Tompkins (1985). **Please help providing a better
-      description!**
-    * ``'hamilton2002'``: Method used in Hamilton (2002). **Please help providing a better
-      description!**
-    * ``'elgendi2010'``: Method used in Elgendi et al. (2010). **Please help providing a better
-      description!**
+    * ``'pantompkins1985'``: Method used in Pan & Tompkins (1985): band-pass filter between 5 and 15 Hz
+      using a Butterworth filter (with zi provided - initial zero-input response provided to avoid 
+      transient artifact at beginning).
+    * ``'hamilton2002'``: Method used in Hamilton (2002): band-pass filter between 8 and 16 Hz
+      using a Butterworth filter (with zi provided).
+    * ``'elgendi2010'``: Method used in Elgendi et al. (2010): band-pass filter between 8 and 20 Hz
+      using a Butterworth filter (with zi provided). 
     * ``'engzeemod2012'``: Method used in Engelse & Zeelenberg (1979). **Please help providing a
       better description!**
     * ``'vg'``: Method used in Visibility Graph Based Detection Emrich et al. (2023)
