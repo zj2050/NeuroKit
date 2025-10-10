@@ -7,9 +7,9 @@ from ..signal import signal_interpolate, signal_cyclesegment
 
 def signal_quality(
     signal, sampling_rate=1000, cycle_inds=None, signal_type=None, method="templatematch", primary_detector=None, 
-    secondary_detector=None, tolerance_window_ms=50
+    secondary_detector=None, tolerance_window_ms=50, window_sec=3, overlap_sec=2
 ):
-    """**Assess quality of signal by comparing individual cycle morphologies with a template**
+    """**Assess quality of signal using various metrics**
 
     Assess the quality of a quasi-periodic signal (e.g. PPG, ECG or RSP) using the specified method. You can pass an
     unfiltered signal as an input, but typically a filtered signal (e.g. cleaned using ``ppg_clean()``, ``ecg_clean()`` or
@@ -37,6 +37,10 @@ def signal_quality(
       quality (0) if that ICI is predicted to be inaccurate. This approach was derived from the previously
       proposed bSQI approach.
 
+    * The ``"skewness"`` method (based on Elgendi, 2016) computes the skewness of the signal in moving windows. 
+      The skewness is a measure of the asymmetry of the probability distribution of the signal's amplitude values. 
+      For the PPG, higher quality signals are generally found to have higher skewness values. The window length and overlap 
+      can be adjusted using the ``window_sec`` and ``overlap_sec`` parameters.
 
     Parameters
     ----------
@@ -50,8 +54,8 @@ def signal_quality(
     signal_type : str
         The signal type (e.g. 'ppg', 'ecg', or 'rsp').
     method : str
-        The processing pipeline to apply. Can be one of ``"disimilarity"``, ``"templatematch"``. The default is
-        ``"templatematch"``.
+        The processing pipeline to apply. Can be one of ``"disimilarity"``, ``"templatematch"``, ``"ici"``, or 
+        ``"skewness"``. The default is ``"templatematch"``.
     primary_detector : str
         The name of the primary cycle (i.e. beat or breath) detector (e.g. the defaults are ``"unsw"`` for the ECG, and
         ``"charlton"`` for the PPG).
@@ -61,6 +65,10 @@ def signal_quality(
     tolerance_window_ms : int
         The tolerance window size (in milliseconds) for use with the "ici" method when assessing agreement between
         primary and secondary cycle detectors.
+    window_sec : float, optional
+        Window length in seconds for windowed metrics (default: 3). Used for the ``"skewness"`` method.
+    overlap_sec : float, optional
+        Overlap between windows in seconds for windowed metrics (default: 2). Used for the ``"skewness"`` method.
     **kwargs
         Additional keyword arguments, usually specific for each method.
 
@@ -68,7 +76,9 @@ def signal_quality(
     -------
     quality : array
         Vector containing the quality index ranging from 0 to 1 for ``"templatematch"`` method,
-        or an unbounded value (where 0 indicates high quality) for ``"disimilarity"`` method.
+        or an unbounded value (where 0 indicates high quality) for ``"disimilarity"`` method,
+        or zeros and ones (where 1 indicates high quality) for ``"ici"`` method,
+        or an unbounded value for ``"skewness"`` method.
 
     See Also
     --------
@@ -82,7 +92,9 @@ def signal_quality(
       Applications in reliability measure for pulse oximetry. Informatics in Medicine Unlocked, 16, 100222.
     * Ho, S.Y.S et al. (2025). "Accurate RR-interval extraction from single-lead, telehealth electrocardiogram signals.
       medRxiv, 2025.03.10.25323655. https://doi.org/10.1101/2025.03.10.25323655
-    
+    * Elgendi, M. et al. (2016). "Optimal signal quality index for photoplethysmogram signals".
+      Bioengineering, 3(4), 1–15. doi: https://doi.org/10.3390/bioengineering3040021
+
     Examples
     --------
     * **Example 1:** Using ICI method to assess PPG signal quality
@@ -114,7 +126,7 @@ def signal_quality(
       nk.signal_plot([ecg, quality], standardize=True)
       plt.close()
     
-    * **Example 2:** Using template-matching method to assess RSP signal quality
+    * **Example 3:** Using template-matching method to assess RSP signal quality
 
     .. ipython:: python
 
@@ -128,6 +140,18 @@ def signal_quality(
       nk.signal_plot([rsp_cleaned, quality], standardize=True)
       plt.close()
     
+    * **Example 4:** Using skewness method to assess PPG signal quality
+
+    .. ipython:: python
+
+      import neurokit2 as nk
+
+      sampling_rate = 100
+      ppg = nk.ppg_simulate(duration=30, sampling_rate=sampling_rate, heart_rate=80)
+      ppg_cleaned = nk.ppg_clean(ppg, sampling_rate=sampling_rate)
+      quality = nk.signal_quality(ppg_cleaned, sampling_rate=sampling_rate, signal_type="ppg", method="skewness")
+      nk.signal_plot([ppg_cleaned, quality], standardize=True)
+      plt.close()
     """
 
     # Check inputs
@@ -154,6 +178,8 @@ def signal_quality(
             signal, signal_type=signal_type, primary_detector=primary_detector, secondary_detector=secondary_detector,
             sampling_rate=sampling_rate,tolerance_window_ms=tolerance_window_ms
         )
+    elif method == "skewness":
+        quality = _quality_skewness(signal, sampling_rate=sampling_rate, window_sec=window_sec, overlap_sec=overlap_sec)
 
     return quality
 
@@ -382,3 +408,49 @@ def _signal_cycles(signal, signal_type, cycle_detector, sampling_rate):
         cycles = info["PPG_Peaks"]
 
     return cycles
+
+
+# =============================================================================
+# Quality assessment using skewness method
+# =============================================================================
+def _quality_skewness(signal, sampling_rate=1000, window_sec=3, overlap_sec=2):
+    """
+    Compute the skewness metric for signal quality in moving windows.
+
+    Parameters
+    ----------
+    signal : array-like
+        Cleaned signal.
+    sampling_rate : int
+        Sampling frequency (Hz).
+    window_sec : float
+        Window length in seconds (default: 3).
+    overlap_sec : float
+        Overlap between windows in seconds (default: 2).
+
+    Returns
+    -------
+    skewness : np.ndarray
+        Skewness values for each window.
+    """
+    window_size = int(window_sec * sampling_rate)
+    step_size = int((window_sec - overlap_sec) * sampling_rate)
+    n_samples = len(signal)
+    skewness_values = []
+
+    for start in range(0, n_samples - window_size + 1, step_size):
+        window = signal[start:start + window_size]
+        mu_x = np.mean(window)
+        omega = np.std(window)
+        if omega == 0:
+            skew = 0
+        else:
+            skew = np.mean(((window - mu_x) / omega) ** 3)
+        skewness_values.append(skew)
+
+    # Pad output to match input length
+    output = np.zeros(n_samples)
+    for i, start in enumerate(range(0, n_samples - window_size + 1, step_size)):
+        output[start:start + window_size] = skewness_values[i]
+
+    return output

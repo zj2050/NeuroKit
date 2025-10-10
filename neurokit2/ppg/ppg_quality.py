@@ -2,9 +2,10 @@
 
 from .ppg_peaks import ppg_peaks
 from ..signal.signal_quality import signal_quality
+import numpy as np
 
 
-def ppg_quality(ppg_cleaned, peaks=None, sampling_rate=1000, method="templatematch"):
+def ppg_quality(ppg_cleaned, peaks=None, sampling_rate=1000, method="templatematch", window_sec=3, overlap_sec=2):
     """**PPG Signal Quality Assessment**
 
     Assess the quality of the PPG Signal using various methods:
@@ -33,6 +34,10 @@ def ppg_quality(ppg_cleaned, peaks=None, sampling_rate=1000, method="templatemat
       it has been applied to the PPG. The general approach was derived by Ho et al from the previously proposed bSQI
       approach.
 
+    * The ``"skewness"`` method (based on Elgendi, 2016) computes the skewness of the PPG signal. The skewness is a 
+      measure of the asymmetry of the probability distribution of the signal's amplitude values. In Elgendi (2016),
+      higher quality signals were generally found to have higher skewness values.
+
     Parameters
     ----------
     ppg_cleaned : Union[list, np.array, pd.Series]
@@ -44,14 +49,19 @@ def ppg_quality(ppg_cleaned, peaks=None, sampling_rate=1000, method="templatemat
         The sampling frequency of the signal (in Hz, i.e., samples/second).
     method : str
         The method for computing PPG signal quality, can be ``"templatematch"`` (default), ``"disimilarity"``,
-        or ``"ho2025"``.
+        ``"ho2025"``, or ``"skewness"``.
+    window_sec : float, optional
+        Window length in seconds for windowed metrics (default: 3, based on Elgendi 2016): ``"skewness"``.
+    overlap_sec : float, optional
+        Overlap between windows in seconds for windowed metrics (default: 2): ``"skewness"``.
 
     Returns
     -------
     quality : array
         Vector containing the quality index ranging from 0 to 1 for ``"templatematch"`` method,
         or an unbounded value (where 0 indicates high quality) for ``"disimilarity"`` method,
-        or zeros and ones (where 1 indicates high quality) for ``"ho2025"`` method.
+        or zeros and ones (where 1 indicates high quality) for ``"ho2025"`` method, or an unbounded value
+        for ``"skewness"`` method.
 
     See Also
     --------
@@ -65,6 +75,8 @@ def ppg_quality(ppg_cleaned, peaks=None, sampling_rate=1000, method="templatemat
       Applications in reliability measure for pulse oximetry. Informatics in Medicine Unlocked, 16, 100222.
     * Ho, S.Y.S et al. (2025). "Accurate RR-interval extraction from single-lead, telehealth electrocardiogram signals.
       medRxiv, 2025.03.10.25323655. https://doi.org/10.1101/2025.03.10.25323655
+    * Elgendi, M. et al. (2016). "Optimal signal quality index for photoplethysmogram signals".
+      Bioengineering, 3(4), 1–15. doi: https://doi.org/10.3390/bioengineering3040021
 
     Examples
     --------
@@ -84,14 +96,23 @@ def ppg_quality(ppg_cleaned, peaks=None, sampling_rate=1000, method="templatemat
       @suppress
       plt.close()
 
+    * **Example 2:** 'skewness' method
+
+    .. ipython:: python
+
+      import neurokit2 as nk
+
+      sampling_rate = 100
+      ppg = nk.ppg_simulate(duration=30, sampling_rate=sampling_rate, heart_rate=80)
+      ppg_cleaned = nk.ppg_clean(ppg, sampling_rate=sampling_rate)
+      quality = nk.ppg_quality(ppg_cleaned, sampling_rate=sampling_rate, method="skewness", window_sec=3, overlap_sec=2)
+
+      nk.signal_plot([ppg_cleaned, quality], standardize=True)
+      plt.close()
+
     """
 
     method = method.lower()  # remove capitalised letters
-
-    # Detect PPG peaks (if not done already)
-    if peaks is None:
-        _, peaks = ppg_peaks(ppg_cleaned, sampling_rate=sampling_rate)
-        peaks = peaks["PPG_Peaks"]
 
     # Sanitise method name
     if method in ["templatematch", "orphanidou2015"]:
@@ -100,10 +121,18 @@ def ppg_quality(ppg_cleaned, peaks=None, sampling_rate=1000, method="templatemat
         method = "disimilarity"
     elif method in ["ho2025", "ho", "ibi", "ici"]:
         method = "ici"
+    elif method in ["skewness"]:
+        method = "skewness"
     else:
         raise ValueError(
-            f"Method '{method}' not recognised. Please use 'templatematch', 'disimilarity', or 'ho2025'."
+            f"Method '{method}' not recognised. Please use 'templatematch', 'disimilarity', 'ho2025', or 'skewness'."
         )
+
+    # Detect PPG peaks (if not done already, and if required for the specified quality-assessment method)
+    if peaks is None:
+        if method in ["templatematch", "disimilarity", "ici"]:
+            _, peaks = ppg_peaks(ppg_cleaned, sampling_rate=sampling_rate)
+            peaks = peaks["PPG_Peaks"]
 
     # Run 'templatematch' and 'disimilarity' methods
     if method in ["templatematch", "disimilarity"]:
@@ -123,6 +152,15 @@ def ppg_quality(ppg_cleaned, peaks=None, sampling_rate=1000, method="templatemat
             secondary_detector="elgendi",
             sampling_rate=sampling_rate,
             method="ici",
+        )
+    elif method == "skewness":
+        quality = signal_quality(
+            ppg_cleaned,
+            sampling_rate=sampling_rate,
+            signal_type="ppg",
+            method="skewness",
+            window_sec=window_sec,
+            overlap_sec=overlap_sec,
         )
 
     return quality
