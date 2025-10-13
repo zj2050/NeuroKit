@@ -268,3 +268,38 @@ def test_ppg_plot():
     nk.ppg_plot(ppg_summary[0:1000], info)
     fig = plt.gcf()
     assert fig.get_axes()[2].get_xlabel() == "Time (seconds)"
+
+
+def test_ppg_quality_all_methods():    
+    sampling_rate = 100
+    duration = 120
+    ppg_raw = nk.ppg_simulate(duration=duration, sampling_rate=sampling_rate, heart_rate=70)
+    ppg_raw = ppg_raw + np.linspace(10, 30, len(ppg_raw))  # to obtain DC offset
+    ppg_cleaned = nk.ppg_clean(ppg_raw, sampling_rate=sampling_rate)
+    methods = [
+        "templatematch", "disimilarity", "ici", "skewness", "kurtosis", "entropy", "perfusion", "relative_power"
+    ]
+    for method in methods:
+        kwargs = {}
+        if method in ["perfusion", "relative_power"]:
+            kwargs["ppg_raw"] = ppg_raw
+        quality = nk.ppg_quality(ppg_cleaned, sampling_rate=sampling_rate, method=method, **kwargs)
+        assert isinstance(quality, (np.ndarray, list)), f"Failed due to incorrect {method} output type"
+        assert len(quality) == len(ppg_cleaned), f"Failed due to incorrect {method} output length"
+        assert np.all(np.isfinite(quality)), f"Failed due to {method} output containing non-finite values"
+        if method == "templatematch":
+            assert np.all((quality >= 0) & (quality <= 1)), "Failed as templatematch output should be between 0 and 1"
+        if method == "ici":
+            assert set(np.unique(quality)).issubset({0, 1}), "Failed as ICI output should be 0 or 1"
+        if method == "perfusion":
+            assert np.all((quality >= 0)), "Failed as perfusion output should be between 0 and 100"
+
+
+def test_ppg_quality_window_error():
+    sampling_rate = 100
+    duration = 2  # Shorter than default window for relative_power
+    ppg_raw = nk.ppg_simulate(duration=duration, sampling_rate=sampling_rate, heart_rate=70)
+    ppg_cleaned = nk.ppg_clean(ppg_raw, sampling_rate=sampling_rate)
+    # Should raise ValueError for too short signal
+    with pytest.raises(ValueError):
+        nk.ppg_quality(ppg_cleaned, sampling_rate=sampling_rate, method="relative_power", ppg_raw=ppg_raw)

@@ -96,7 +96,8 @@ def ppg_quality(
         Vector containing the quality index ranging from 0 to 1 for ``"templatematch"`` method,
         or an unbounded value (where 0 indicates high quality) for ``"disimilarity"`` method,
         or zeros and ones (where 1 indicates high quality) for ``"ho2025"`` method, or an unbounded value
-        for ``"skewness"``, ``"kurtosis"``, ``"entropy"``, ``"perfusion"``, or ``"relative_power"`` methods.
+        for ``"skewness"``, ``"kurtosis"``, or ``"entropy"``, or a value between 0 and 100% for ``"perfusion"`` method 
+        (100% being high-quality), or an unbounded value (where 0 indicates low quality) for ``"relative_power"`` method.
 
     See Also
     --------
@@ -184,7 +185,7 @@ def ppg_quality(
             window_sec = 60
         if overlap_sec is None:
             overlap_sec = 30
-    elif method in ["skewness", "kurtosis", "perfusion"]:
+    elif method in ["skewness", "kurtosis", "perfusion", "entropy"]:
         if window_sec is None:
             window_sec = 3
         if overlap_sec is None:
