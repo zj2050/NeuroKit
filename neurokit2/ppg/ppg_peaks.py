@@ -17,14 +17,19 @@ def ppg_peaks(
 ):
     """**Find systolic peaks in a photoplethysmogram (PPG) signal**
 
-    Find the peaks in an PPG signal using the specified method. You can pass an unfiltered PPG
-    signals as input, but typically a filtered PPG (cleaned using ``ppg_clean()``) will result in
+    Find the peaks in a PPG signal using the specified method. You can pass an unfiltered PPG
+    signal as input, but typically a filtered PPG (cleaned using ``ppg_clean()``) will provide
     better results.
 
-    .. note::
+    Methods available (see `ppg_findpeaks` for details):
 
-      Please help us improve the methods' documentation and features.
-
+    * ``"elgendi"``: Method by Elgendi et al. (2013), based on moving average and thresholding.
+    * ``"bishop"``: Method by Bishop & Ercole (2018), multi-scale peak and trough detection. Returns pulse onsets as 
+      well as peaks.
+    * ``"charlton"``: MSPTDfastv2 method by Charlton et al. (2025). Uses an efficient multi-scale peak and trough 
+      detection algorithm. Returns pulse onsets as well as peaks.
+    * ``"charlton2024"``: MSPTDfastv1 method by Charlton et al. (2024). Returns pulse onsets as well as peaks. Uses 
+      an efficient multi-scale peak and trough detection algorithm. Now superseded by v2 (i.e. ``charlton``).
 
     Parameters
     ----------
@@ -33,7 +38,7 @@ def ppg_peaks(
     sampling_rate : int
         The sampling frequency of ``ppg_cleaned`` (in Hz, i.e., samples/second). Defaults to 1000.
     method : str
-        The processing pipeline to apply. Can be one of ``"elgendi"``, ``"bishop"``, ``"charlton"``.
+        The processing pipeline to apply. Can be one of ``"elgendi"``, ``"bishop"``, ``"charlton"``, or ``"charlton2024"``.
         The default is ``"elgendi"``.
     correct_artifacts : bool
         Whether or not to identify and fix artifacts, using the method by
@@ -46,17 +51,17 @@ def ppg_peaks(
     Returns
     -------
     signals : DataFrame
-        A DataFrame of same length as the input signal in which occurrences of R-peaks marked as
+        A DataFrame of same length as the input signal in which occurrences of peaks marked as
         ``1`` in a list of zeros with the same length as ``ppg_cleaned``. Accessible with the keys
         ``"PPG_Peaks"``.
     info : dict
-        A dictionary containing additional information, in this case the samples at which R-peaks
+        A dictionary containing additional information, in this case the samples at which peaks
         occur, accessible with the key ``"PPG_Peaks"``, as well as the signals' sampling rate,
         accessible with the key ``"sampling_rate"``.
 
     See Also
     --------
-    ppg_clean, ppg_fixpeaks, .signal_fixpeaks
+    ppg_clean, ppg_fixpeaks, .signal_fixpeaks, ppg_findpeaks
 
     Examples
     --------
@@ -97,6 +102,8 @@ def ppg_peaks(
       (pp. 189-195). Springer International Publishing.
     * Charlton, P. H. et al. (2025). The MSPTDfast photoplethysmography beat detection algorithm:
       design, benchmarking, and open-source distribution. Physiological Measurement, 46, 035002.
+    * Charlton, P. H. et al. (2024). MSPTDfast: An Efficient Photoplethysmography Beat Detection
+      Algorithm. Proc CinC.
 
     """
     # Store info
@@ -114,7 +121,7 @@ def ppg_peaks(
 
     # Peak (and onset) correction
     # - tidy up peaks and onsets
-    if info['method_fixpeaks'].lower() == "charlton2022":  # this is the default settings when using MSPTDfastv1 or MSPTDfastv2
+    if info['method_fixpeaks'].lower() == "charlton2022":  # this is the default setting when using MSPTDfastv1 or MSPTDfastv2
         info["PPG_Peaks_Unfixed"] = info["PPG_Peaks"].copy()
         info["PPG_Onsets_Unfixed"] = info["PPG_Onsets"].copy()
 
