@@ -117,9 +117,7 @@ def fractal_mandelbrot(
             iterations=iterations,
         )
     else:
-        img = _buddhabrot(
-            size=size, real_range=real_range, imaginary_range=imaginary_range, iterations=iterations
-        )
+        img = _buddhabrot(size=size, real_range=real_range, imaginary_range=imaginary_range, iterations=iterations)
 
     if show is True:
         plt.imshow(img, cmap="rainbow")
@@ -135,9 +133,7 @@ def fractal_mandelbrot(
 
 def _mandelbrot(size=1000, real_range=(-2, 2), imaginary_range=(-2, 2), iterations=25, threshold=4):
 
-    img, c = _mandelbrot_initialize(
-        size=size, real_range=real_range, imaginary_range=imaginary_range
-    )
+    img, c = _mandelbrot_initialize(size=size, real_range=real_range, imaginary_range=imaginary_range)
 
     optim = _mandelbrot_optimize(c)
 
@@ -208,7 +204,7 @@ def _buddhabrot(size=1000, iterations=100, real_range=(-2, 2), imaginary_range=(
         img[y, x] += 1
 
         # apply mandelbrot dynamic
-        z = z ** 2 + c
+        z = z**2 + c
 
         # shed the points that have escaped
         mask = np.abs(z) < 2
@@ -236,7 +232,7 @@ def _buddhabrot_initialize(size=1000, iterations=100, real_range=(-2, 2), imagin
 
     for i in range(iterations):  # pylint: disable=W0612
         # apply mandelbrot dynamic
-        z = z ** 2 + c
+        z = z**2 + c
 
         # collect the c points that have escaped
         mask = np.abs(z) < 2
@@ -265,11 +261,11 @@ def _mandelbrot_optimize(c):
     # see: http://en.wikipedia.org/wiki/Mandelbrot_set#Optimizations
 
     # First eliminate points within the cardioid
-    p = (((c.real - 0.25) ** 2) + (c.imag ** 2)) ** 0.5
-    mask1 = c.real > p - (2 * p ** 2) + 0.25
+    p = (((c.real - 0.25) ** 2) + (c.imag**2)) ** 0.5
+    mask1 = c.real > p - (2 * p**2) + 0.25
 
     # Next eliminate points within the period-2 bulb
-    mask2 = ((c.real + 1) ** 2) + (c.imag ** 2) > 0.0625
+    mask2 = ((c.real + 1) ** 2) + (c.imag**2) > 0.0625
 
     # Combine masks
     mask = np.logical_and(mask1, mask2)
@@ -277,6 +273,4 @@ def _mandelbrot_optimize(c):
 
 
 def _mandelbrot_width2height(size=1000, real_range=(-2, 2), imaginary_range=(-2, 2)):
-    return int(
-        np.rint((imaginary_range[1] - imaginary_range[0]) / (real_range[1] - real_range[0]) * size)
-    )
+    return int(np.rint((imaginary_range[1] - imaginary_range[0]) / (real_range[1] - real_range[0]) * size))

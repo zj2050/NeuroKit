@@ -121,9 +121,7 @@ def _emg_eventrelated_features(epoch, output={}):
 
     output["EMG_Amplitude_Mean"] = mean
     output["EMG_Amplitude_Max"] = maximum
-    output["EMG_Amplitude_SD"] = np.std(
-        epoch["EMG_Amplitude"][epoch.index > 0].iloc[activated_signal]
-    )
+    output["EMG_Amplitude_SD"] = np.std(epoch["EMG_Amplitude"][epoch.index > 0].iloc[activated_signal])
     output["EMG_Amplitude_Max_Time"] = time
     output["EMG_Bursts"] = activations
 

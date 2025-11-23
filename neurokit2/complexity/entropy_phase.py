@@ -79,9 +79,7 @@ def entropy_phase(signal, delay=1, k=4, show=False, **kwargs):
     """
     # Sanity checks
     if isinstance(signal, (np.ndarray, pd.DataFrame)) and signal.ndim > 1:
-        raise ValueError(
-            "Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet."
-        )
+        raise ValueError("Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet.")
 
     info = {"k": k, "Delay": delay}
 
@@ -101,10 +99,7 @@ def entropy_phase(signal, delay=1, k=4, show=False, **kwargs):
 
     # 4. The cumulative slope of each sector is obtained by adding the slope of each scatter point # within that sector
     # 5. The probability distribution of the slopes in each sector is computed
-    freq = [
-        np.sum(theta[np.logical_and((theta > angles[i]), (theta < angles[i + 1]))])
-        for i in range(k)
-    ]
+    freq = [np.sum(theta[np.logical_and((theta > angles[i]), (theta < angles[i + 1]))]) for i in range(k)]
     freq = np.array(freq) / np.sum(freq)
 
     # 6. the Shannon entropy computed from the distribution p(i)
@@ -129,9 +124,7 @@ def entropy_phase(signal, delay=1, k=4, show=False, **kwargs):
         plt.figure()
         for i in range(k):
             plt.plot(x[Tx[i, :]], y[Tx[i, :]], ".", color=tuple(colors[i, :]))
-            plt.plot(
-                np.vstack((np.zeros(k + 1), Xs)), np.vstack((np.zeros(k + 1), Ys)), color="red"
-            )
+            plt.plot(np.vstack((np.zeros(k + 1), Xs)), np.vstack((np.zeros(k + 1), Ys)), color="red")
         plt.axis([-limx, limx, -limx, limx])
         plt.gca().set_aspect("equal", "box")
         plt.xlabel(r"$X(n +  \tau) - X(n)$"),

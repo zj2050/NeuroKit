@@ -78,10 +78,7 @@ def spawn_random_state(rng, n_children=1):
         if rng._bit_generator._seed_seq is not None:
             rng_class = type(rng)
             bit_generator_class = type(rng._bit_generator)
-            return [
-                rng_class(bit_generator_class(seed=s))
-                for s in rng._bit_generator._seed_seq.spawn(n_children)
-            ]
+            return [rng_class(bit_generator_class(seed=s)) for s in rng._bit_generator._seed_seq.spawn(n_children)]
     except TypeError:
         # The rng does not support spawning through SeedSequence, see below
         pass
@@ -98,9 +95,7 @@ def spawn_random_state(rng, n_children=1):
     return [np.random.RandomState(seed=s) for s in temp_rng.random_raw(n_children)]
 
 
-def check_random_state_children(
-    random_state_parent, random_state_children, n_children=1
-):
+def check_random_state_children(random_state_parent, random_state_children, n_children=1):
     """**Create new independent children random number generators to be used in sub-functions**
 
     Parameters

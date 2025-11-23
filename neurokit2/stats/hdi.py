@@ -57,9 +57,7 @@ def hdi(x, ci=0.95, show=False, **kwargs):
     window_size = np.ceil(ci * len(x_sorted)).astype("int")
 
     if window_size < 2:
-        raise ValueError(
-            "NeuroKit error: hdi(): `ci` is too small or x does not contain enough data points."
-        )
+        raise ValueError("NeuroKit error: hdi(): `ci` is too small or x does not contain enough data points.")
 
     nCIs = len(x_sorted) - window_size
 

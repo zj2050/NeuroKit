@@ -105,9 +105,6 @@ def ecg_rsp(ecg_rate, sampling_rate=1000, method="vangent2019"):
         # https://github.com/paulvangentcom/heartrate_analysis_python/blob/1597e8c0b2602829428b22d8be88420cd335e939/heartpy/analysis.py#L541 # noqa: E501
         rsp = signal_filter(ecg_rate, sampling_rate, lowcut=0.1, highcut=0.4, order=2)
     else:
-        raise ValueError(
-            "`method` should be one of 'sarkar2015', 'charlton2016', 'soni2019' or "
-            "'vangent2019'."
-        )
+        raise ValueError("`method` should be one of 'sarkar2015', 'charlton2016', 'soni2019' or " "'vangent2019'.")
 
     return rsp

@@ -14,9 +14,7 @@ from .ecg_peaks import ecg_peaks
 from .ecg_segment import ecg_segment
 
 
-def ecg_quality(
-    ecg_cleaned, rpeaks=None, sampling_rate=1000, method="averageQRS", approach=None
-):
+def ecg_quality(ecg_cleaned, rpeaks=None, sampling_rate=1000, method="averageQRS", approach=None):
     """**ECG Signal Quality Assessment**
 
     Assess the quality of the ECG Signal using various methods:
@@ -149,7 +147,6 @@ def ecg_quality(
 
     method = method.lower()  # remove capitalised letters
 
-
     # Sanitise method name
     if method in ["templatematch", "orphanidou2015"]:
         method = "templatematch"
@@ -160,9 +157,7 @@ def ecg_quality(
 
     # Run quality assessment algorithm
     if method in ["averageqrs"]:
-        quality = _ecg_quality_averageQRS(
-            ecg_cleaned, rpeaks=rpeaks, sampling_rate=sampling_rate
-        )
+        quality = _ecg_quality_averageQRS(ecg_cleaned, rpeaks=rpeaks, sampling_rate=sampling_rate)
     elif method in ["zhao2018", "zhao", "SQI"]:
         if approach is None:
             approach = "simple"
@@ -174,9 +169,7 @@ def ecg_quality(
                 category=NeuroKitWarning,
             )
 
-        quality = _ecg_quality_zhao2018(
-            ecg_cleaned, rpeaks=rpeaks, sampling_rate=sampling_rate, mode=approach
-        )
+        quality = _ecg_quality_zhao2018(ecg_cleaned, rpeaks=rpeaks, sampling_rate=sampling_rate, mode=approach)
     elif method in ["templatematch", "dissimilarity"]:
         # Detect R peaks (if not done already)
         if rpeaks is None:
@@ -215,9 +208,7 @@ def _ecg_quality_averageQRS(ecg_cleaned, rpeaks=None, sampling_rate=1000):
 
     # Get heartbeats
     heartbeats = ecg_segment(ecg_cleaned, rpeaks, sampling_rate)
-    data = epochs_to_df(heartbeats).pivot(
-        index="Label", columns="Time", values="Signal"
-    )
+    data = epochs_to_df(heartbeats).pivot(index="Label", columns="Time", values="Signal")
     data.index = data.index.astype(int)
     data = data.sort_index()
 
@@ -237,9 +228,7 @@ def _ecg_quality_averageQRS(ecg_cleaned, rpeaks=None, sampling_rate=1000):
     quality[nonmissing] = dist
 
     # Interpolate
-    quality = signal_interpolate(
-        rpeaks, quality, x_new=np.arange(len(ecg_cleaned)), method="previous"
-    )
+    quality = signal_interpolate(rpeaks, quality, x_new=np.arange(len(ecg_cleaned)), method="previous")
 
     return quality
 
@@ -248,13 +237,7 @@ def _ecg_quality_averageQRS(ecg_cleaned, rpeaks=None, sampling_rate=1000):
 # Zhao (2018) method
 # =============================================================================
 def _ecg_quality_zhao2018(
-    ecg_cleaned,
-    rpeaks=None,
-    sampling_rate=1000,
-    window=1024,
-    kurtosis_method="fisher",
-    mode="simple",
-    **kwargs
+    ecg_cleaned, rpeaks=None, sampling_rate=1000, window=1024, kurtosis_method="fisher", mode="simple", **kwargs
 ):
     """Return ECG quality classification of based on Zhao et al. (2018),
     based on three indices: pSQI, kSQI, basSQI (qSQI not included here).
@@ -299,12 +282,8 @@ def _ecg_quality_zhao2018(
 
     # Compute indexes
     kSQI = _ecg_quality_kSQI(ecg_cleaned, method=kurtosis_method)
-    pSQI = _ecg_quality_pSQI(
-        ecg_cleaned, sampling_rate=sampling_rate, window=window, **kwargs
-    )
-    basSQI = _ecg_quality_basSQI(
-        ecg_cleaned, sampling_rate=sampling_rate, window=window, **kwargs
-    )
+    pSQI = _ecg_quality_pSQI(ecg_cleaned, sampling_rate=sampling_rate, window=window, **kwargs)
+    basSQI = _ecg_quality_basSQI(ecg_cleaned, sampling_rate=sampling_rate, window=window, **kwargs)
 
     # Classify indices based on simple heuristic fusion
     if mode == "simple":
@@ -426,9 +405,7 @@ def _ecg_quality_zhao2018(
         # W = np.array([0.4, 0.4, 0.1, 0.1])
         W = np.array([0.6, 0.2, 0.2])
 
-        S = np.array(
-            [np.sum((R[:, 0] * W)), np.sum((R[:, 1] * W)), np.sum((R[:, 2] * W))]
-        )
+        S = np.array([np.sum((R[:, 0] * W)), np.sum((R[:, 1] * W)), np.sum((R[:, 2] * W))])
 
         # classify
         V = np.sum(np.power(S, 2) * [1, 2, 3]) / np.sum(np.power(S, 2))
@@ -451,12 +428,7 @@ def _ecg_quality_kSQI(ecg_cleaned, method="fisher"):
 
 
 def _ecg_quality_pSQI(
-    ecg_cleaned,
-    sampling_rate=1000,
-    window=1024,
-    num_spectrum=[5, 15],
-    dem_spectrum=[5, 40],
-    **kwargs
+    ecg_cleaned, sampling_rate=1000, window=1024, num_spectrum=[5, 15], dem_spectrum=[5, 40], **kwargs
 ):
     """Power Spectrum Distribution of QRS Wave."""
 
@@ -477,12 +449,7 @@ def _ecg_quality_pSQI(
 
 
 def _ecg_quality_basSQI(
-    ecg_cleaned,
-    sampling_rate=1000,
-    window=1024,
-    num_spectrum=[0, 1],
-    dem_spectrum=[0, 40],
-    **kwargs
+    ecg_cleaned, sampling_rate=1000, window=1024, num_spectrum=[0, 1], dem_spectrum=[0, 40], **kwargs
 ):
     """Relative Power in the Baseline."""
     psd = signal_power(

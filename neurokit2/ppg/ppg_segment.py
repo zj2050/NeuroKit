@@ -51,12 +51,14 @@ def ppg_segment(ppg_cleaned, peaks=None, sampling_rate=1000, show=False, **kwarg
     if len(ppg_cleaned) < sampling_rate * 4:
         raise ValueError("The data length is too small to be segmented.")
 
-    output = signal_cyclesegment(ppg_cleaned, peaks, ratio_pre=0.3, sampling_rate=sampling_rate, show=show, signal_name="ppg", **kwargs)
+    output = signal_cyclesegment(
+        ppg_cleaned, peaks, ratio_pre=0.3, sampling_rate=sampling_rate, show=show, signal_name="ppg", **kwargs
+    )
 
     # if asked to return an axis handle
     if show == "return":
         return output
-    
+
     # else, extract heartbeats
     heartbeats, _ = output
 

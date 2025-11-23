@@ -69,9 +69,7 @@ def entropy_kl(signal, delay=1, dimension=2, norm="euclidean", **kwargs):
     """
     # Sanity checks
     if isinstance(signal, (np.ndarray, pd.DataFrame)) and signal.ndim > 1:
-        raise ValueError(
-            "Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet."
-        )
+        raise ValueError("Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet.")
 
     info = {"Dimension": dimension, "Delay": delay}
 

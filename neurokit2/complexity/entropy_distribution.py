@@ -58,9 +58,7 @@ def entropy_distribution(signal=None, delay=1, dimension=3, bins="Sturges", base
     """
     # Sanity checks
     if isinstance(signal, (np.ndarray, pd.DataFrame)) and signal.ndim > 1:
-        raise ValueError(
-            "Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet."
-        )
+        raise ValueError("Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet.")
 
     # Store parameters
     info = {
@@ -77,9 +75,7 @@ def entropy_distribution(signal=None, delay=1, dimension=3, bins="Sturges", base
     d = np.zeros(round(n * (n - 1) / 2))
     for k in range(1, n):
         Ix = (int((k - 1) * (n - k / 2)), int(k * (n - ((k + 1) / 2))))
-        d[Ix[0] : Ix[1]] = np.max(
-            abs(np.tile(embedded[k - 1, :], (n - k, 1)) - embedded[k:, :]), axis=1
-        )
+        d[Ix[0] : Ix[1]] = np.max(abs(np.tile(embedded[k - 1, :], (n - k, 1)) - embedded[k:, :]), axis=1)
     # TODO: "D is symmetrical. Only the upper or lower triangular matrix will actually be adequate
     # for the estimation of the ePDF, which can be used to facilitate its fast calculation."
 

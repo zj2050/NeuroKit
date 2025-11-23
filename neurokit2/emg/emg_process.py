@@ -72,9 +72,7 @@ def emg_process(emg_signal, sampling_rate=1000, report=None, **kwargs):
     methods = emg_methods(sampling_rate=sampling_rate, **kwargs)
 
     # Clean signal
-    emg_cleaned = emg_clean(
-        emg_signal, sampling_rate=sampling_rate, method=methods["method_cleaning"]
-    )
+    emg_cleaned = emg_clean(emg_signal, sampling_rate=sampling_rate, method=methods["method_cleaning"])
 
     # Get amplitude
     amplitude = emg_amplitude(emg_cleaned)
@@ -90,9 +88,7 @@ def emg_process(emg_signal, sampling_rate=1000, report=None, **kwargs):
     info["sampling_rate"] = sampling_rate  # Add sampling rate in dict info
 
     # Prepare output
-    signals = pd.DataFrame(
-        {"EMG_Raw": emg_signal, "EMG_Clean": emg_cleaned, "EMG_Amplitude": amplitude}
-    )
+    signals = pd.DataFrame({"EMG_Raw": emg_signal, "EMG_Clean": emg_cleaned, "EMG_Amplitude": amplitude})
 
     signals = pd.concat([signals, activity_signal], axis=1)
 

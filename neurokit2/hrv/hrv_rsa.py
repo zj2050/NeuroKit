@@ -143,9 +143,7 @@ def hrv_rsa(
 
     """
 
-    signals, ecg_period, rpeaks, sampling_rate = _hrv_rsa_formatinput(
-        ecg_signals, rsp_signals, rpeaks, sampling_rate
-    )
+    signals, ecg_period, rpeaks, sampling_rate = _hrv_rsa_formatinput(ecg_signals, rsp_signals, rpeaks, sampling_rate)
 
     # Extract cycles
     rsp_cycles = _hrv_rsa_cycles(signals)
@@ -157,8 +155,7 @@ def hrv_rsa(
         rsp_peaks = rsp_peaks[:-1]
     if len(rsp_peaks) - len(rsp_onsets) != -1:
         warn(
-            "Couldn't find rsp cycles onsets and centers. Check your RSP signal."
-            + " Returning empty dict.",
+            "Couldn't find rsp cycles onsets and centers. Check your RSP signal." + " Returning empty dict.",
             category=NeuroKitWarning,
         )
         return {}
@@ -215,9 +212,7 @@ def hrv_rsa(
 # =============================================================================
 # Methods (Domains)
 # =============================================================================
-def _hrv_rsa_p2t(
-    rsp_onsets, rpeaks, sampling_rate, continuous=False, ecg_period=None, rsp_peaks=None
-):
+def _hrv_rsa_p2t(rsp_onsets, rpeaks, sampling_rate, continuous=False, ecg_period=None, rsp_peaks=None):
     """Peak-to-trough algorithm (P2T)"""
 
     # Find all RSP cycles and the Rpeaks within
@@ -233,12 +228,8 @@ def _hrv_rsa_p2t(
         rsp_peak = rsp_peaks[idx]
         cycle_end = rsp_onsets[idx + 1] + rsp_offset
         # Separately select RRI for inhalation and exhalation
-        cycles_rri_inh.append(
-            rpeaks[np.logical_and(rpeaks >= cycle_init, rpeaks < rsp_peak_offset)]
-        )
-        cycles_rri_exh.append(
-            rpeaks[np.logical_and(rpeaks >= rsp_peak, rpeaks < cycle_end)]
-        )
+        cycles_rri_inh.append(rpeaks[np.logical_and(rpeaks >= cycle_init, rpeaks < rsp_peak_offset)])
+        cycles_rri_exh.append(rpeaks[np.logical_and(rpeaks >= rsp_peak, rpeaks < cycle_end)])
 
     # Iterate over all cycles
     rsa_values = np.full(len(cycles_rri_exh), np.nan)
@@ -246,9 +237,7 @@ def _hrv_rsa_p2t(
         # Estimate of RSA during each breathing phase
         RRis_inh = np.diff(cycles_rri_inh[i]) / sampling_rate * 1000
         RRis_exh = np.diff(cycles_rri_exh[i]) / sampling_rate * 1000
-        if np.logical_and(
-            len(RRis_inh) > 0, len(RRis_exh) > 0
-        ):  # you need at least one RRI
+        if np.logical_and(len(RRis_inh) > 0, len(RRis_exh) > 0):  # you need at least one RRI
             rsa_value = np.max(RRis_exh) - np.min(RRis_inh)
             if rsa_value > 0:
                 # Take into consideration only rsp cycles in which the max exh > than min inh
@@ -261,9 +250,7 @@ def _hrv_rsa_p2t(
         rsa = {"RSA_P2T_Mean": np.nanmean(rsa_values)}
         rsa["RSA_P2T_Mean_log"] = np.log(rsa["RSA_P2T_Mean"])  # pylint: disable=E1111
         rsa["RSA_P2T_SD"] = np.nanstd(rsa_values, ddof=1)
-        rsa["RSA_P2T_NoRSA"] = len(
-            pd.Series(rsa_values).index[pd.Series(rsa_values).isnull()]
-        )
+        rsa["RSA_P2T_NoRSA"] = len(pd.Series(rsa_values).index[pd.Series(rsa_values).isnull()])
     else:
         rsa = signal_interpolate(
             x_values=rsp_peaks[~np.isnan(rsa_values)],
@@ -280,9 +267,7 @@ def _hrv_rsa_pb(ecg_period, sampling_rate, continuous=False):
         return None
 
     # Re-sample at 2 Hz
-    resampled = signal_resample(
-        ecg_period, sampling_rate=sampling_rate, desired_sampling_rate=2
-    )
+    resampled = signal_resample(ecg_period, sampling_rate=sampling_rate, desired_sampling_rate=2)
 
     # Fit 21-point cubic polynomial filter (zero mean, 3rd order)
     # with a low-pass cutoff frequency of 0.095Hz
@@ -298,9 +283,7 @@ def _hrv_rsa_pb(ecg_period, sampling_rate, continuous=False):
 
     zero_mean = resampled - trend
     # Remove variance outside bandwidth of spontaneous respiration
-    zero_mean_filtered = signal_filter(
-        zero_mean, sampling_rate=2, lowcut=0.12, highcut=0.40
-    )
+    zero_mean_filtered = signal_filter(zero_mean, sampling_rate=2, lowcut=0.12, highcut=0.40)
 
     # Divide into 30-second epochs
     time = np.arange(0, len(zero_mean_filtered)) / 2
@@ -442,9 +425,7 @@ def _hrv_rsa_gates(
     # Sanitize output
     if continuous is False:
         rsa = {"RSA_Gates_Mean": np.nanmean(meanRSA)}
-        rsa["RSA_Gates_Mean_log"] = np.log(
-            rsa["RSA_Gates_Mean"]
-        )  # pylint: disable=E1111
+        rsa["RSA_Gates_Mean_log"] = np.log(rsa["RSA_Gates_Mean"])  # pylint: disable=E1111
         rsa["RSA_Gates_SD"] = np.nanstd(meanRSA, ddof=1)
     else:
         # For window=32, meanRSA is RSA from 16th second to xth second where x=recording
@@ -462,9 +443,7 @@ def _hrv_rsa_gates(
         # Convert to samples
         time = np.multiply(time, sampling_rate)
 
-        rsa = signal_interpolate(
-            time.astype(int), meanRSA, x_new=len(ecg_signals), method="monotone_cubic"
-        )
+        rsa = signal_interpolate(time.astype(int), meanRSA, x_new=len(ecg_signals), method="monotone_cubic")
     return rsa
 
 
@@ -485,8 +464,7 @@ def _get_multipeak_window(nperseg, window_number=8):
     length = np.arange(1, nperseg).conj().transpose()
     r0 = 2 / C * (1 - np.exp(-C * B / 2))
     r_num = 2 * C - np.exp(-C * B / 2) * (
-        2 * C * np.cos(np.pi * B * length)
-        - 4 * np.pi * length * np.sin(np.pi * B * length)
+        2 * C * np.cos(np.pi * B * length) - 4 * np.pi * length * np.sin(np.pi * B * length)
     )
 
     r_den = C**2 + (2 * np.pi * length) ** 2
@@ -498,8 +476,7 @@ def _get_multipeak_window(nperseg, window_number=8):
     rbox = np.append(B, r)
 
     rpen = (
-        10 ** (K2 / 10) * np.append(1, np.zeros((nperseg - 1, 1)))
-        - (10 ** (K2 / 10) - 1) * rbox
+        10 ** (K2 / 10) * np.append(1, np.zeros((nperseg - 1, 1))) - (10 ** (K2 / 10) - 1) * rbox
     )  # Covariance function penalty function
 
     Ry = scipy.linalg.toeplitz(rpeak)
@@ -553,9 +530,7 @@ def _hrv_rsa_cycles(signals):
 
 
 def _hrv_rsa_formatinput(ecg_signals, rsp_signals, rpeaks=None, sampling_rate=1000):
-    rpeaks, sampling_rate = _hrv_format_input(
-        rpeaks, sampling_rate=sampling_rate, output_format="peaks"
-    )
+    rpeaks, sampling_rate = _hrv_format_input(rpeaks, sampling_rate=sampling_rate, output_format="peaks")
 
     # Sanity Checks
     if isinstance(ecg_signals, tuple):
@@ -575,9 +550,7 @@ def _hrv_rsa_formatinput(ecg_signals, rsp_signals, rpeaks=None, sampling_rate=10
                 )
             else:
                 raise ValueError(
-                    "NeuroKit error: _hrv_rsa_formatinput():"
-                    "Wrong input, we couldn't extract"
-                    "heart rate signal."
+                    "NeuroKit error: _hrv_rsa_formatinput():" "Wrong input, we couldn't extract" "heart rate signal."
                 )
     if rsp_signals is None:
         rsp_signals = ecg_signals.copy()
@@ -602,15 +575,12 @@ def _hrv_rsa_formatinput(ecg_signals, rsp_signals, rpeaks=None, sampling_rate=10
             rpeaks = _signal_formatpeaks_sanitize(ecg_signals)
         except NameError as e:
             raise ValueError(
-                "NeuroKit error: _hrv_rsa_formatinput(): "
-                "Wrong input, we couldn't extract rpeaks indices."
+                "NeuroKit error: _hrv_rsa_formatinput(): " "Wrong input, we couldn't extract rpeaks indices."
             ) from e
     else:
         rpeaks = _signal_formatpeaks_sanitize(rpeaks)
 
-    nonduplicates = ecg_signals.columns[
-        [i not in rsp_signals.columns for i in ecg_signals.columns]
-    ]
+    nonduplicates = ecg_signals.columns[[i not in rsp_signals.columns for i in ecg_signals.columns]]
     signals = pd.concat([ecg_signals[nonduplicates], rsp_signals], axis=1)
 
     return signals, ecg_period, rpeaks, sampling_rate

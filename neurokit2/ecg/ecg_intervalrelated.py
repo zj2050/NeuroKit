@@ -82,9 +82,7 @@ def ecg_intervalrelated(data, sampling_rate=1000):
             intervals[index] = _ecg_intervalrelated_formatinput(data[index], intervals[index])
 
             # HRV
-            intervals[index] = _ecg_intervalrelated_hrv(
-                data[index], sampling_rate, intervals[index]
-            )
+            intervals[index] = _ecg_intervalrelated_hrv(data[index], sampling_rate, intervals[index])
 
         ecg_intervals = pd.DataFrame.from_dict(intervals, orient="index")
 

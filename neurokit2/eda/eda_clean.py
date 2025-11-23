@@ -109,9 +109,7 @@ def _eda_clean_neurokit(eda_signal, sampling_rate=1000):
         return eda_signal
 
     # Filtering
-    filtered = signal_filter(
-        eda_signal, sampling_rate=sampling_rate, highcut=3, method="butterworth", order=4
-    )
+    filtered = signal_filter(eda_signal, sampling_rate=sampling_rate, highcut=3, method="butterworth", order=4)
 
     return filtered
 
@@ -128,17 +126,13 @@ def _eda_clean_biosppy(eda_signal, sampling_rate=1000):
     # Parameters
     order = 4
     frequency = 5
-    frequency = (
-        2 * np.array(frequency) / sampling_rate
-    )  # Normalize frequency to Nyquist Frequency (Fs/2).
+    frequency = 2 * np.array(frequency) / sampling_rate  # Normalize frequency to Nyquist Frequency (Fs/2).
 
     # Filtering
     b, a = scipy.signal.butter(N=order, Wn=frequency, btype="lowpass", analog=False, output="ba")
     filtered = scipy.signal.filtfilt(b, a, eda_signal)
 
     # Smoothing
-    clean = signal_smooth(
-        filtered, method="convolution", kernel="boxzen", size=int(0.75 * sampling_rate)
-    )
+    clean = signal_smooth(filtered, method="convolution", kernel="boxzen", size=int(0.75 * sampling_rate))
 
     return clean

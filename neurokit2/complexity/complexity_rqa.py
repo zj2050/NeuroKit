@@ -8,9 +8,7 @@ from .optim_complexity_tolerance import complexity_tolerance
 from .utils_recurrence_matrix import recurrence_matrix
 
 
-def complexity_rqa(
-    signal, dimension=3, delay=1, tolerance="sd", min_linelength=2, method="python", show=False
-):
+def complexity_rqa(signal, dimension=3, delay=1, tolerance="sd", min_linelength=2, method="python", show=False):
     """**Recurrence Quantification Analysis (RQA)**
 
     A :func:`recurrence plot <recurrence_matrix>` is based on a time-delay embedding representation
@@ -111,11 +109,7 @@ def complexity_rqa(
       Dimensions in Time Series through Recurrence Quantification Analysis. Entropy, 24(9), 1314.
 
     """
-    info = {
-        "Tolerance": complexity_tolerance(
-            signal, method=tolerance, delay=delay, dimension=dimension
-        )[0]
-    }
+    info = {"Tolerance": complexity_tolerance(signal, method=tolerance, delay=delay, dimension=dimension)[0]}
 
     if method == "pyrqa":
         data = _complexity_rqa_pyrqa(

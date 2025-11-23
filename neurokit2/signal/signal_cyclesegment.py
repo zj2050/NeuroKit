@@ -5,7 +5,10 @@ import numpy as np
 from ..epochs import epochs_create, epochs_to_df
 from ..signal.signal_rate import signal_rate
 
-def signal_cyclesegment(signal_cleaned, cycle_indices, ratio_pre=0.5, sampling_rate=1000, show=False, signal_name="signal", **kwargs):
+
+def signal_cyclesegment(
+    signal_cleaned, cycle_indices, ratio_pre=0.5, sampling_rate=1000, show=False, signal_name="signal", **kwargs
+):
     """**Segment a signal into individual cycles**
 
     Segment a signal (e.g. ECG, PPG, respiratory) into individual cycles (e.g. heartbeats, pulse waves, breaths).
@@ -148,6 +151,7 @@ def _segment_plot(cycles, cyclerate=0, signal_name="signal", color="#F44336", ax
     ax.legend(loc="upper right")
     return ax
 
+
 def _segment_window(
     cycle_indices=None,
     sampling_rate=1000,
@@ -158,16 +162,12 @@ def _segment_window(
     # Determine cycle rate
     if cycle_rate is None:
         if cycle_indices is not None:
-            cycle_rate = np.mean(
-                signal_rate(
-                    cycle_indices, sampling_rate=sampling_rate, desired_length=desired_length
-                )
-            )
+            cycle_rate = np.mean(signal_rate(cycle_indices, sampling_rate=sampling_rate, desired_length=desired_length))
         else:
             raise ValueError("Either `cycle_rate` or `cycle_indices` must be provided.")
     else:
         cycle_rate = np.mean(cycle_rate)  # In case it's an array
-    
+
     # Modulator
     # Note: this is based on quick internal testing but could be improved
     window_size = 60 / cycle_rate  # Cycles per second

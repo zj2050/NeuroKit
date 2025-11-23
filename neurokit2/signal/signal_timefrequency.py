@@ -189,7 +189,7 @@ def signal_timefrequency(
             sampling_rate=sampling_rate,
             min_frequency=min_frequency,
             max_frequency=max_frequency,
-            wavelet_name=wavelet_name
+            wavelet_name=wavelet_name,
         )
     # WVD
     elif method.lower() in ["WignerVille", "wvd"]:
@@ -270,7 +270,12 @@ def short_term_ft(
 
 
 def continuous_wt(
-    signal, sampling_rate=1000, min_frequency=0.04, max_frequency=None, wavelet_name=None, nfreqbin=None,
+    signal,
+    sampling_rate=1000,
+    min_frequency=0.04,
+    max_frequency=None,
+    wavelet_name=None,
+    nfreqbin=None,
 ):
     """**Continuous Wavelet Transform**
 
@@ -311,7 +316,7 @@ def continuous_wt(
     scales = pywt.frequency2scale(wavelet_name, frequency / sampling_rate)
 
     # cwt using specified mother wavelet
-    tfr, tfrf = pywt.cwt(signal, scales, wavelet_name, method="fft", sampling_period=1/sampling_rate)
+    tfr, tfrf = pywt.cwt(signal, scales, wavelet_name, method="fft", sampling_period=1 / sampling_rate)
 
     # compute time domain ticks
     time = np.arange(len(signal)) / sampling_rate
@@ -349,9 +354,7 @@ def wvd(signal, sampling_rate=1000, n_freqbins=None, analytical_signal=True, met
     if n_freqbins % 2 == 0:
         frequency = np.hstack((np.arange(n_freqbins / 2), np.arange(-n_freqbins / 2, 0)))
     else:
-        frequency = np.hstack(
-            (np.arange((n_freqbins - 1) / 2), np.arange(-(n_freqbins - 1) / 2, 0))
-        )
+        frequency = np.hstack((np.arange((n_freqbins - 1) / 2), np.arange(-(n_freqbins - 1) / 2, 0)))
     tfr = np.zeros((n_freqbins, time.shape[0]), dtype=complex)  # the time-frequency matrix
 
     tausec = round(n_freqbins / 2.0)
@@ -371,17 +374,11 @@ def wvd(signal, sampling_rate=1000, n_freqbins=None, analytical_signal=True, met
         tau = np.arange(-taulens[idx], taulens[idx] + 1).astype(int)
         # this step is required to use the efficient DFT
         indices = np.remainder(n_freqbins + tau, n_freqbins).astype(int)
-        tfr[indices, idx] = (
-            fwindows[fwindows_mpts + tau] * signal[idx + tau] * conj_signal[idx - tau]
-        )
+        tfr[indices, idx] = fwindows[fwindows_mpts + tau] * signal[idx + tau] * conj_signal[idx - tau]
         if (idx < signal.shape[0] - tausec) and (idx >= tausec + 1):
             tfr[tausec, idx] = (
-                fwindows[fwindows_mpts + tausec]
-                * signal[idx + tausec]
-                * np.conj(signal[idx - tausec])
-                + fwindows[fwindows_mpts - tausec]
-                * signal[idx - tausec]
-                * conj_signal[idx + tausec]
+                fwindows[fwindows_mpts + tausec] * signal[idx + tausec] * np.conj(signal[idx - tausec])
+                + fwindows[fwindows_mpts - tausec] * signal[idx - tausec] * conj_signal[idx + tausec]
             )
             tfr[tausec, idx] *= 0.5
 
@@ -509,13 +506,9 @@ def smooth_pseudo_wvd(
     # Calculate pwvd
     for i, t in enumerate(time_array):
         # time shift
-        tau_max = np.min(
-            [t + midpt_time - 1, N - t + midpt_time, np.round(N / 2.0) - 1, midpt_freq]
-        )
+        tau_max = np.min([t + midpt_time - 1, N - t + midpt_time, np.round(N / 2.0) - 1, midpt_freq])
         # time-lag list
-        tau = np.arange(
-            start=-np.min([midpt_time, N - t]), stop=np.min([midpt_time, t - 1]) + 1, dtype="int"
-        )
+        tau = np.arange(start=-np.min([midpt_time, N - t]), stop=np.min([midpt_time, t - 1]) + 1, dtype="int")
         time_pts = (midpt_time + tau).astype(int)
         g2 = time_window[time_pts]
         g2 = g2 / np.sum(g2)

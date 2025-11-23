@@ -5,9 +5,7 @@ from ..signal import signal_power
 from .utils import _sanitize_eeg
 
 
-def eeg_power(
-    eeg, sampling_rate=None, frequency_band=["Gamma", "Beta", "Alpha", "Theta", "Delta"], **kwargs
-):
+def eeg_power(eeg, sampling_rate=None, frequency_band=["Gamma", "Beta", "Alpha", "Theta", "Delta"], **kwargs):
     """**EEG Power in Different Frequency Bands**
 
     See our `walkthrough <https://neuropsychology.github.io/NeuroKit/examples/eeg_power/eeg_power.html>`_ for

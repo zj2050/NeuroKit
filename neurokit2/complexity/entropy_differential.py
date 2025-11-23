@@ -59,9 +59,7 @@ def entropy_differential(signal, base=2, **kwargs):
     """
     # Sanity checks
     if isinstance(signal, (np.ndarray, pd.DataFrame)) and signal.ndim > 1:
-        raise ValueError(
-            "Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet."
-        )
+        raise ValueError("Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet.")
 
     # Check if string ('ABBA'), and convert each character to list (['A', 'B', 'B', 'A'])
     if not isinstance(signal, str):

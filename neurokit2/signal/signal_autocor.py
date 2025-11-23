@@ -4,9 +4,7 @@ import scipy.stats
 from matplotlib import pyplot as plt
 
 
-def signal_autocor(
-    signal, lag=None, demean=True, method="auto", unbiased=False, show=False
-):
+def signal_autocor(signal, lag=None, demean=True, method="auto", unbiased=False, show=False):
     """**Autocorrelation (ACF)**
 
     Compute the autocorrelation of a signal.
@@ -81,9 +79,7 @@ def signal_autocor(
         method = "fft"
 
     if method in ["auto"]:
-        acov = scipy.signal.correlate(signal, signal, mode="full", method="auto")[
-            n - 1 :
-        ]
+        acov = scipy.signal.correlate(signal, signal, mode="full", method="auto")[n - 1 :]
     elif method in ["cor", "correlation", "correlate"]:
         acov = np.correlate(signal, signal, mode="full")
         acov = acov[n - 1 :]  # Min time lag is 0
@@ -118,9 +114,7 @@ def signal_autocor(
 
     if lag is not None:
         if lag > n:
-            raise ValueError(
-                "NeuroKit error: signal_autocor(): The time lag exceeds the duration of the signal. "
-            )
+            raise ValueError("NeuroKit error: signal_autocor(): The time lag exceeds the duration of the signal. ")
         else:
             r = r[lag]
 

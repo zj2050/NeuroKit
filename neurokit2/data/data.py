@@ -250,11 +250,7 @@ def data(dataset="bio_eventrelated_100hz"):
             else:
                 raw = pickle.load(response)
 
-        if (
-            hasattr(raw.info, "proj_id")
-            and isinstance(raw.info.proj_id, np.ndarray)
-            and raw.info.proj_id.size == 1
-        ):
+        if hasattr(raw.info, "proj_id") and isinstance(raw.info.proj_id, np.ndarray) and raw.info.proj_id.size == 1:
             raw.info["proj_id"] = int(raw.info.proj_id[0])
         elif not hasattr(raw.info, "proj_id") or not isinstance(raw.info.proj_id, int):
             raw.info.proj_id = None

@@ -7,9 +7,7 @@ import scipy.signal
 from ..signal import signal_smooth
 
 
-def ppg_findpeaks(
-    ppg_cleaned, sampling_rate=1000, method="elgendi", show=False, **kwargs
-):
+def ppg_findpeaks(ppg_cleaned, sampling_rate=1000, method="elgendi", show=False, **kwargs):
     """**Find systolic peaks in a photoplethysmogram (PPG) signal**
 
     Low-level function used by :func:`ppg_peaks` to identify peaks in a PPG signal using a
@@ -90,9 +88,9 @@ def ppg_findpeaks(
 
     # Prepare output.
     info = {"PPG_Peaks": peaks}
-    if 'onsets' in locals():
+    if "onsets" in locals():
         info["PPG_Onsets"] = onsets
-        info["method_fixpeaks"] = 'Charlton2022'  # This was the default methodology used in MSPTDfastv1 and MSPTDfastv2
+        info["method_fixpeaks"] = "Charlton2022"  # This was the default methodology used in MSPTDfastv1 and MSPTDfastv2
 
     return info
 
@@ -148,9 +146,7 @@ def _ppg_findpeaks_elgendi(
 
     # Identify systolic peaks within waves (ignore waves that are too short).
     num_waves = min(beg_waves.size, end_waves.size)
-    min_len = int(
-        np.rint(peakwindow * sampling_rate)
-    )  # this is threshold 2 in the paper
+    min_len = int(np.rint(peakwindow * sampling_rate))  # this is threshold 2 in the paper
     min_delay = int(np.rint(mindelay * sampling_rate))
     peaks = [0]
 
@@ -269,8 +265,7 @@ def _ppg_findpeaks_charlton(
     # Inner functions
 
     def find_m_max(x, N, max_scale, m_max):
-        """Find local maxima scalogram for peaks
-        """
+        """Find local maxima scalogram for peaks"""
 
         for k in range(1, max_scale + 1):  # scalogram scales
             for i in range(k + 2, N - k + 2):
@@ -280,8 +275,7 @@ def _ppg_findpeaks_charlton(
         return m_max
 
     def find_m_min(x, N, max_scale, m_min):
-        """Find local minima scalogram for onsets
-        """
+        """Find local minima scalogram for onsets"""
 
         for k in range(1, max_scale + 1):  # scalogram scales
             for i in range(k + 2, N - k + 2):
@@ -332,11 +326,11 @@ def _ppg_findpeaks_charlton(
 
         # Step 0: Don't calculate scales outside the range of plausible HRs
 
-        plaus_hr_hz = np.array(options['plaus_hr_bpm']) / 60  # in Hz
+        plaus_hr_hz = np.array(options["plaus_hr_bpm"]) / 60  # in Hz
         init_scales = np.arange(1, L + 1)
         durn_signal = len(signal) / fs
         init_scales_fs = (L / init_scales) / durn_signal
-        if options['use_reduced_lms_scales']:
+        if options["use_reduced_lms_scales"]:
             init_scales_inc_log = init_scales_fs >= plaus_hr_hz[0]
         else:
             init_scales_inc_log = np.ones_like(init_scales_fs, dtype=bool)  # DIDN"T FULLY UNDERSTAND
@@ -371,9 +365,9 @@ def _ppg_findpeaks_charlton(
         # Step 3: Use lambda to remove all elements of m for which k>lambda
         first_scale_to_include = np.argmax(init_scales_inc_log)
         if options["find_pks"]:
-            m_max = m_max[first_scale_to_include:lambda_max + 1, :]
+            m_max = m_max[first_scale_to_include : lambda_max + 1, :]
         if options["find_trs"]:
-            m_min = m_min[first_scale_to_include:lambda_min + 1, :]
+            m_min = m_min[first_scale_to_include : lambda_min + 1, :]
 
         # Step 4: Find peaks (and onsets)
         # - column-wise summation
@@ -392,22 +386,22 @@ def _ppg_findpeaks_charlton(
         return peaks, onsets
 
     # ~~~ Main function ~~~
-    
+
     # Specify settings
     # - version: optimal selection (CinC 2024)
     options = {
-        'find_trs': True,  # whether or not to find onsets
-        'find_pks': True,  # whether or not to find peaks
-        'do_ds': True,  # whether or not to do downsampling
-        'ds_freq': 20,  # the target downsampling frequency
-        'use_reduced_lms_scales': True,  # whether or not to reduce the number of scales (default 30 bpm)
-        'win_len': win_durn,  # duration of individual windows for analysis (8 secs for MSPTDfastv1; 6 secs for MSPTDfastv2)
-        'win_overlap': 0.2,  # proportion of window overlap
-        'plaus_hr_bpm': [30, 200],  # range of plausible HRs (only the lower bound is used)
-        'tol_durn': 0.05,  # tolerance window (+/- tol_durn) within which to search for true peak either side of candidate peak
+        "find_trs": True,  # whether or not to find onsets
+        "find_pks": True,  # whether or not to find peaks
+        "do_ds": True,  # whether or not to do downsampling
+        "ds_freq": 20,  # the target downsampling frequency
+        "use_reduced_lms_scales": True,  # whether or not to reduce the number of scales (default 30 bpm)
+        "win_len": win_durn,  # duration of individual windows for analysis (8 secs for MSPTDfastv1; 6 secs for MSPTDfastv2)
+        "win_overlap": 0.2,  # proportion of window overlap
+        "plaus_hr_bpm": [30, 200],  # range of plausible HRs (only the lower bound is used)
+        "tol_durn": 0.05,  # tolerance window (+/- tol_durn) within which to search for true peak either side of candidate peak
     }
 
-    options['tol_durn'] = 0.15  # added for neurokit implementation
+    options["tol_durn"] = 0.15  # added for neurokit implementation
 
     # Split into overlapping windows
     no_samps_in_win = options["win_len"] * sampling_rate
@@ -439,10 +433,10 @@ def _ppg_findpeaks_charlton(
     # cycle through each window
     for win_no in range(len(win_starts)):
         # Extract this window's data
-        win_sig = signal[win_starts[win_no]:win_ends[win_no]]
+        win_sig = signal[win_starts[win_no] : win_ends[win_no]]
 
         # Downsample signal
-        if options['do_ds']:
+        if options["do_ds"]:
             rel_sig = downsample(win_sig, ds_factor)
             rel_fs = ds_fs
         else:
@@ -453,12 +447,12 @@ def _ppg_findpeaks_charlton(
         p, t = detect_peaks_and_onsets_using_msptd(rel_sig, rel_fs, options)
 
         # Resample peaks
-        if options['do_ds']:
+        if options["do_ds"]:
             p = [peak * ds_factor for peak in p]
             t = [onset * ds_factor for onset in t]
 
         # Correct peak indices by finding highest point within tolerance either side of detected peaks
-        tol_durn = options['tol_durn']  # note that this is only used if sampling frequency is 20 Hz or higher.
+        tol_durn = options["tol_durn"]  # note that this is only used if sampling frequency is 20 Hz or higher.
         if rel_fs < 10:
             tol_durn = 0.2
         elif rel_fs < 20:
@@ -466,13 +460,13 @@ def _ppg_findpeaks_charlton(
         tol = int(np.ceil(rel_fs * tol_durn))
 
         for pk_no in range(len(p)):
-            segment = win_sig[(p[pk_no] - tol):(p[pk_no] + tol + 1)]
+            segment = win_sig[(p[pk_no] - tol) : (p[pk_no] + tol + 1)]
             temp = np.argmax(segment)
             p[pk_no] = p[pk_no] - tol + temp
 
         # Correct onset indices by finding highest point within tolerance either side of detected onsets
         for onset_no in range(len(t)):
-            segment = win_sig[(t[onset_no] - tol):(t[onset_no] + tol + 1)]
+            segment = win_sig[(t[onset_no] - tol) : (t[onset_no] + tol + 1)]
             temp = np.argmin(segment)
             t[onset_no] = t[onset_no] - tol + temp
 

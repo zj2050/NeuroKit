@@ -110,15 +110,12 @@ def complexity_optimize(
     if tolerance_method in ["traditional"]:
         out["Tolerance"] = 0.2 * np.std(signal, ddof=1)
     if tolerance_method in ["maxapen", "optimize"]:
-        r_range, ApEn, out["Tolerance"] = _complexity_tolerance(
-            signal, delay=out["Delay"], dimension=out["Dimension"]
-        )
+        r_range, ApEn, out["Tolerance"] = _complexity_tolerance(signal, delay=out["Delay"], dimension=out["Dimension"])
 
     if show is True:
         if tolerance_method in ["traditional"]:
             raise ValueError(
-                "NeuroKit error: complexity_optimize():"
-                "show is not available for current tolerance_method"
+                "NeuroKit error: complexity_optimize():" "show is not available for current tolerance_method"
             )
         if tolerance_method in ["maxapen", "optimize"]:
             _complexity_plot(
@@ -251,17 +248,12 @@ def _complexity_delay(signal, delay_max=100, method="fraser1986"):
     if ~np.isnan(optimal):
         tau = tau_sequence[optimal]
     else:
-        raise ValueError(
-            "NeuroKit error: No optimal time delay is found."
-            " Consider using a higher `delay_max`."
-        )
+        raise ValueError("NeuroKit error: No optimal time delay is found." " Consider using a higher `delay_max`.")
 
     return tau_sequence, metric, metric_values, tau
 
 
-def _complexity_dimension(
-    signal, delay=1, dimension_max=20, method="afnn", R=10.0, A=2.0, **kwargs
-):
+def _complexity_dimension(signal, delay=1, dimension_max=20, method="afnn", R=10.0, A=2.0, **kwargs):
 
     # Initalize vectors
     if isinstance(dimension_max, int):
@@ -272,9 +264,7 @@ def _complexity_dimension(
     # Method
     method = method.lower()
     if method in ["afnn"]:
-        E, Es = _embedding_dimension_afn(
-            signal, dimension_seq=dimension_seq, delay=delay, show=False, **kwargs
-        )
+        E, Es = _embedding_dimension_afn(signal, dimension_seq=dimension_seq, delay=delay, show=False, **kwargs)
         E1 = E[1:] / E[:-1]
         E2 = Es[1:] / Es[:-1]
         min_dimension = [i for i, x in enumerate(E1 >= 0.85 * np.max(E1)) if x][0] + 1
@@ -282,9 +272,7 @@ def _complexity_dimension(
         return dimension_seq, optimize_indices, min_dimension
 
     if method in ["fnn"]:
-        f1, f2, f3 = _embedding_dimension_ffn(
-            signal, dimension_seq=dimension_seq, delay=delay, R=R, A=A, **kwargs
-        )
+        f1, f2, f3 = _embedding_dimension_ffn(signal, dimension_seq=dimension_seq, delay=delay, R=R, A=A, **kwargs)
         min_dimension = [i for i, x in enumerate(f3 <= 1.85 * np.min(f3[np.nonzero(f3)])) if x][0]
         optimize_indices = [f1, f2, f3]
         return dimension_seq, optimize_indices, min_dimension
@@ -298,9 +286,7 @@ def _complexity_tolerance(signal, delay=None, dimension=None):
     r_range = modulator * np.std(signal, ddof=1)
     ApEn = np.zeros_like(r_range)
     for i, r in enumerate(r_range):
-        ApEn[i] = entropy_approximate(
-            signal, delay=delay, dimension=dimension, tolerance=r_range[i]
-        )[0]
+        ApEn[i] = entropy_approximate(signal, delay=delay, dimension=dimension, tolerance=r_range[i])[0]
     r = r_range[np.argmax(ApEn)]
 
     return r_range, ApEn, r

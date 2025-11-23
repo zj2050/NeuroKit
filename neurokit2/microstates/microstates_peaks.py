@@ -89,9 +89,7 @@ def microstates_peaks(eeg, gfp=None, sampling_rate=None, distance_between=0.01, 
     # if gfp is True or gfp is None:
     gfp = eeg_gfp(eeg, **kwargs)
 
-    peaks = _microstates_peaks_gfp(
-        gfp=gfp, sampling_rate=sampling_rate, distance_between=distance_between
-    )
+    peaks = _microstates_peaks_gfp(gfp=gfp, sampling_rate=sampling_rate, distance_between=distance_between)
 
     return peaks
 

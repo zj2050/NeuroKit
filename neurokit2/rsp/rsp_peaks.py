@@ -79,22 +79,13 @@ def rsp_peaks(rsp_cleaned, sampling_rate=1000, method="khodadad2018", **kwargs):
     info = {"method_peaks": method.lower(), "method_fixpeaks": "None"}
 
     # Find peaks
-    info.update(
-        rsp_findpeaks(
-            rsp_cleaned,
-            sampling_rate=sampling_rate,
-            method=method,
-            **kwargs
-        )
-    )
+    info.update(rsp_findpeaks(rsp_cleaned, sampling_rate=sampling_rate, method=method, **kwargs))
 
     # Fix peaks
     info = rsp_fixpeaks(info)
 
     # Format peaks
-    peak_signal = signal_formatpeaks(
-        info, desired_length=len(rsp_cleaned), peak_indices=info["RSP_Peaks"]
-    )
+    peak_signal = signal_formatpeaks(info, desired_length=len(rsp_cleaned), peak_indices=info["RSP_Peaks"])
 
     info["sampling_rate"] = sampling_rate  # Add sampling rate in dict info
 

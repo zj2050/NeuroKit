@@ -62,9 +62,7 @@ def entropy_svd(signal, delay=1, dimension=2, show=False):
     """
     # Sanity checks
     if isinstance(signal, (np.ndarray, pd.DataFrame)) and signal.ndim > 1:
-        raise ValueError(
-            "Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet."
-        )
+        raise ValueError("Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet.")
 
     embedded = complexity_embedding(signal, delay=delay, dimension=dimension, show=show)
     W = np.linalg.svd(embedded, compute_uv=False)  # Compute SVD

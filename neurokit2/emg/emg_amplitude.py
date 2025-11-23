@@ -86,9 +86,7 @@ def _emg_amplitude_tkeo(emg_cleaned):
 # =============================================================================
 # Linear Envelope
 # =============================================================================
-def _emg_amplitude_envelope(
-    emg_cleaned, sampling_rate=1000, lowcut=10, highcut=400, envelope_filter=8
-):
+def _emg_amplitude_envelope(emg_cleaned, sampling_rate=1000, lowcut=10, highcut=400, envelope_filter=8):
     """Calculate the linear envelope of a signal.
 
     This function implements a 2nd-order Butterworth filter with zero lag, described by Marcos Duarte

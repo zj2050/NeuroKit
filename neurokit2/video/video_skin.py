@@ -113,9 +113,7 @@ def video_skin(face, show=False):
         fgdModel = np.zeros((1, 65), np.float64)
 
         if img.size != 0:
-            mask, bgdModel, fgdModel = cv2.grabCut(
-                img, grab_mask, None, bgdModel, fgdModel, 5, cv2.GC_INIT_WITH_MASK
-            )
+            mask, bgdModel, fgdModel = cv2.grabCut(img, grab_mask, None, bgdModel, fgdModel, 5, cv2.GC_INIT_WITH_MASK)
             mask = np.where((mask == 2) | (mask == 0), 0, 1).astype("uint8")
 
     mask = mask.astype("uint8")

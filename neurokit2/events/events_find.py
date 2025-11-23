@@ -143,9 +143,7 @@ def events_find(
       events
 
     """
-    events = _events_find(
-        event_channel, threshold=threshold, threshold_keep=threshold_keep
-    )
+    events = _events_find(event_channel, threshold=threshold, threshold_keep=threshold_keep)
 
     # Warning when no events detected
     if len(events["onset"]) == 0:
@@ -175,12 +173,8 @@ def events_find(
     # Remove based on interval min
     if inter_min > 0:
         inter = np.diff(events["onset"])
-        events["onset"] = np.concatenate(
-            [events["onset"][0:1], events["onset"][1::][inter >= inter_min]]
-        )
-        events["duration"] = np.concatenate(
-            [events["duration"][0:1], events["duration"][1::][inter >= inter_min]]
-        )
+        events["onset"] = np.concatenate([events["onset"][0:1], events["onset"][1::][inter >= inter_min]])
+        events["duration"] = np.concatenate([events["duration"][0:1], events["duration"][1::][inter >= inter_min]])
 
     # Remove first and last n
     if discard_first > 0:
@@ -190,9 +184,7 @@ def events_find(
         events["onset"] = events["onset"][0 : -1 * discard_last]
         events["duration"] = events["duration"][0 : -1 * discard_last]
 
-    events = _events_find_label(
-        events, event_labels=event_labels, event_conditions=event_conditions
-    )
+    events = _events_find_label(events, event_labels=event_labels, event_conditions=event_conditions)
 
     return events
 
@@ -202,9 +194,7 @@ def events_find(
 # =============================================================================
 
 
-def _events_find_label(
-    events, event_labels=None, event_conditions=None, function_name="events_find"
-):
+def _events_find_label(events, event_labels=None, event_conditions=None, function_name="events_find"):
     # Get n events
     n = len(events["onset"])
 
@@ -263,9 +253,7 @@ def _events_find(event_channel, threshold="auto", threshold_keep="above"):
         binary = signal_binarize(event_channel, threshold=threshold)
 
     if threshold_keep not in ["above", "below"]:
-        raise ValueError(
-            "In events_find(), 'threshold_keep' must be one of 'above' or 'below'."
-        )
+        raise ValueError("In events_find(), 'threshold_keep' must be one of 'above' or 'below'.")
 
     if threshold_keep != "above":
         binary = np.abs(binary - 1)  # Reverse if events are below
@@ -301,9 +289,7 @@ def _events_generate_events_channel(event_channels):
     )
 
     # check if dataframe
-    is_dataframe = (
-        isinstance(event_channels, pd.DataFrame) and len(event_channels.columns) > 1
-    )
+    is_dataframe = isinstance(event_channels, pd.DataFrame) and len(event_channels.columns) > 1
 
     # if neither, return None and continue
     if not is_nested_loop and not is_dataframe:

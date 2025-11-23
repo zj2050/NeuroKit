@@ -85,9 +85,7 @@ def eeg_badchannels(eeg, bad_threshold=0.5, distance_threshold=0.99, show=False)
     results = results.set_index("Channel")
 
     z = standardize(results)
-    results["Bad"] = (z.abs() > scipy.stats.norm.ppf(distance_threshold)).sum(axis=1) / len(
-        results.columns
-    )
+    results["Bad"] = (z.abs() > scipy.stats.norm.ppf(distance_threshold)).sum(axis=1) / len(results.columns)
     bads = ch_names[np.where(results["Bad"] >= bad_threshold)[0]]
 
     if show:

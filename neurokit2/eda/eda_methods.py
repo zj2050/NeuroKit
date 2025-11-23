@@ -6,6 +6,7 @@ from .eda_clean import eda_clean
 from .eda_peaks import eda_peaks
 from .eda_phasic import eda_phasic
 
+
 def eda_methods(
     sampling_rate=1000,
     method="default",
@@ -112,30 +113,36 @@ def eda_methods(
     report_info["text_peaks"] = "The cleaned signal was used to detect peaks using"
     if method_peaks in ["gamboa2008", "gamboa"]:
         report_info["text_peaks"] += " the method described in Gamboa et al. (2008)."
-        refs.append("""Gamboa, H. (2008). Multi-modal behavioral biometrics based on hci
-        and electrophysiology. PhD ThesisUniversidade.""")
+        refs.append(
+            """Gamboa, H. (2008). Multi-modal behavioral biometrics based on hci
+        and electrophysiology. PhD ThesisUniversidade."""
+        )
     elif method_peaks in ["kim", "kbk", "kim2004", "biosppy"]:
         report_info["text_peaks"] += " the method described in Kim et al. (2004)."
-        refs.append("""Kim, K. H., Bang, S. W., & Kim, S. R. (2004). Emotion recognition system using short-term
+        refs.append(
+            """Kim, K. H., Bang, S. W., & Kim, S. R. (2004). Emotion recognition system using short-term
       monitoring of physiological signals. Medical and biological engineering and computing, 42(3),
-      419-427.""")
+      419-427."""
+        )
     elif method_peaks in ["nk", "nk2", "neurokit", "neurokit2"]:
         report_info["text_peaks"] += " the default method of the `neurokit2` package."
         refs.append("https://doi.org/10.21105/joss.01667")
     elif method_peaks in ["vanhalem2020", "vanhalem", "halem2020"]:
         report_info["text_peaks"] += " the method described in Vanhalem et al. (2020)."
-        refs.append("""van Halem, S., Van Roekel, E., Kroencke, L., Kuper, N., & Denissen, J. (2020).
+        refs.append(
+            """van Halem, S., Van Roekel, E., Kroencke, L., Kuper, N., & Denissen, J. (2020).
       Moments That Matter? On the Complexity of Using Triggers Based on Skin Conductance to Sample
-      Arousing Events Within an Experience Sampling Framework. European Journal of Personality.""")
+      Arousing Events Within an Experience Sampling Framework. European Journal of Personality."""
+        )
     elif method_peaks in ["nabian2018", "nabian"]:
         report_info["text_peaks"] += " the method described in Nabian et al. (2018)."
-        refs.append("""Nabian, M., Yin, Y., Wormwood, J., Quigley, K. S., Barrett, L. F., & Ostadabbas, S. (2018). An
+        refs.append(
+            """Nabian, M., Yin, Y., Wormwood, J., Quigley, K. S., Barrett, L. F., & Ostadabbas, S. (2018). An
       Open-Source Feature Extraction Tool for the Analysis of Peripheral Physiological Data. IEEE
-      journal of translational engineering in health and medicine, 6, 2800711.""")
+      journal of translational engineering in health and medicine, 6, 2800711."""
+        )
     else:
-        report_info[
-            "text_peaks"
-        ] = f"The peak detection was carried out using the method {method_peaks}."
+        report_info["text_peaks"] = f"The peak detection was carried out using the method {method_peaks}."
 
     # References
     report_info["references"] = list(np.unique(refs))

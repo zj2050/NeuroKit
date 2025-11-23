@@ -50,9 +50,7 @@ def ecg_segment(ecg_cleaned, rpeaks=None, sampling_rate=1000, show=False, **kwar
     """
     # Sanitize inputs
     if rpeaks is None:
-        _, rpeaks = ecg_peaks(
-            ecg_cleaned, sampling_rate=sampling_rate, correct_artifacts=True
-        )
+        _, rpeaks = ecg_peaks(ecg_cleaned, sampling_rate=sampling_rate, correct_artifacts=True)
         rpeaks = rpeaks["ECG_R_Peaks"]
 
     if len(ecg_cleaned) < sampling_rate * 4:
@@ -159,11 +157,7 @@ def _ecg_segment_window(
     if heart_rate is not None:
         heart_rate = np.mean(heart_rate)
     if rpeaks is not None:
-        heart_rate = np.mean(
-            signal_rate(
-                rpeaks, sampling_rate=sampling_rate, desired_length=desired_length
-            )
-        )
+        heart_rate = np.mean(signal_rate(rpeaks, sampling_rate=sampling_rate, desired_length=desired_length))
 
     # Modulator
     # Note: this is based on quick internal testing but could be improved

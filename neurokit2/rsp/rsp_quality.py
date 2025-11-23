@@ -81,9 +81,7 @@ def rsp_quality(rsp_cleaned, peaks=None, sampling_rate=1000, method="templatemat
     elif method in ["dissimilarity", "sabeti2019"]:
         method = "dissimilarity"
     else:
-        raise ValueError(
-            f"Method '{method}' not recognised. Please use 'templatematch'."
-        )
+        raise ValueError(f"Method '{method}' not recognised. Please use 'templatematch'.")
 
     # Do method-specific pre-processing
     if method in ["templatematch"]:

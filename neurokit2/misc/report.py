@@ -84,9 +84,7 @@ def summarize_table(signals):
         summary[rate_col + "_SD"] = np.std(signals[rate_col])
         summary_table = pd.DataFrame(summary, index=[0])
         # Make HTML and Markdown versions
-        html = '<h2 style="background-color: #D60574">Summary table</h1>' + summary_table.to_html(
-            index=None
-        )
+        html = '<h2 style="background-color: #D60574">Summary table</h1>' + summary_table.to_html(index=None)
 
         try:
             md = summary_table.to_markdown(index=None)
@@ -187,11 +185,7 @@ def get_default_args(func):
     """Get the default values of a function's arguments."""
     # https://stackoverflow.com/questions/12627118/get-a-function-arguments-default-value
     signature = inspect.signature(func)
-    return {
-        k: v.default
-        for k, v in signature.parameters.items()
-        if v.default is not inspect.Parameter.empty
-    }
+    return {k: v.default for k, v in signature.parameters.items() if v.default is not inspect.Parameter.empty}
 
 
 def get_kwargs(report_info, func):

@@ -96,9 +96,7 @@ def fractal_density(signal, delay=1, tolerance="sd", bins=None, show=False, **kw
     """
     # Sanity checks
     if isinstance(signal, (np.ndarray, pd.DataFrame)) and signal.ndim > 1:
-        raise ValueError(
-            "Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet."
-        )
+        raise ValueError("Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet.")
     if isinstance(signal, (np.ndarray, list)):
         # This index is made to work on epochs, so if not an epoch,
         # got to transform
@@ -113,13 +111,10 @@ def fractal_density(signal, delay=1, tolerance="sd", bins=None, show=False, **kw
         # Compute number of "bins"
         bins = int((edges[1] - edges[0]) / tolerance)
 
-
     # Prepare the container for the 2D density matrix
     X = np.empty((bins, bins, len(signal)))
     for i, (k, epoch) in enumerate(signal.items()):
-        X[:, :, i] = _fractal_density(
-            epoch["Signal"].dropna().values, edges, bins=bins, delay=delay, **kwargs
-        )
+        X[:, :, i] = _fractal_density(epoch["Signal"].dropna().values, edges, bins=bins, delay=delay, **kwargs)
 
     # Compute grand average
     grand_av = np.mean(X, axis=-1)
@@ -145,7 +140,10 @@ def _fractal_density(signal, edges, bins, delay=1, method="histogram"):
     if method == "histogram":
         edges = np.linspace(edges[0], edges[1], bins + 1)
         edges = np.reshape(np.repeat(edges, 2), (len(edges), 2))
-        X, _, = np.histogramdd(
+        (
+            X,
+            _,
+        ) = np.histogramdd(
             emb,
             bins=edges.T,
             density=False,

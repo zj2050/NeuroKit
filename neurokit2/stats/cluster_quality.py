@@ -215,9 +215,7 @@ def _cluster_quality_gap(data, clusters, clustering, info, n_random=10, rng=None
         _, random_clusters, info = info["clustering_function"](random_data)
         random_activation = random_clusters.dot(random_data.T)
         random_clustering = np.argmax(np.abs(random_activation), axis=0)
-        dispersion_random[i] = _cluster_quality_sumsquares(
-            random_data, random_clusters, random_clustering
-        )
+        dispersion_random[i] = _cluster_quality_sumsquares(random_data, random_clusters, random_clustering)
 
     # Compute GAP
     gap = np.mean(np.log(dispersion_random)) - np.log(dispersion)

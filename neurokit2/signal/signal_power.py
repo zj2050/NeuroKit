@@ -99,9 +99,7 @@ def signal_power(
             **kwargs,
         )
     else:
-        out = _signal_power_continuous(
-            signal, frequency_band, sampling_rate=sampling_rate
-        )
+        out = _signal_power_continuous(signal, frequency_band, sampling_rate=sampling_rate)
 
     out = pd.DataFrame.from_dict(out, orient="index").T
 
@@ -182,9 +180,7 @@ def _signal_power_instant_plot(psd, out, frequency_band, ax=None):
     # Get indexes for different frequency band
     frequency_band_index = []
     for band in frequency_band:
-        indexes = np.logical_and(
-            psd["Frequency"] >= band[0], psd["Frequency"] < band[1]
-        )  # pylint: disable=E1111
+        indexes = np.logical_and(psd["Frequency"] >= band[0], psd["Frequency"] < band[1])  # pylint: disable=E1111
         frequency_band_index.append(np.array(indexes))
 
     labels = list(out.keys())
@@ -239,9 +235,7 @@ def _signal_power_continuous(signal, frequency_band, sampling_rate=1000):
     return out
 
 
-def _signal_power_continuous_get(
-    signal, frequency_band, sampling_rate=1000, precision=20
-):
+def _signal_power_continuous_get(signal, frequency_band, sampling_rate=1000, precision=20):
 
     try:
         import mne
@@ -262,7 +256,5 @@ def _signal_power_continuous_get(
     power = np.mean(out[0][0], axis=0)
 
     out = {}
-    out[f"{frequency_band[0]:.2f}-{frequency_band[1]:.2f}Hz"] = (
-        power  # use literal string format
-    )
+    out[f"{frequency_band[0]:.2f}-{frequency_band[1]:.2f}Hz"] = power  # use literal string format
     return out

@@ -75,9 +75,7 @@ def download_zip(url, destination_path=None, unzip=True):
 
                 # Rename the extracted folder to the desired name
                 extracted_folder_path = destination_directory / extracted_folder_name
-                new_folder_path = (
-                    destination_directory / pathlib.Path(destination_path).name
-                )
+                new_folder_path = destination_directory / pathlib.Path(destination_path).name
                 extracted_folder_path.rename(new_folder_path)
 
             # Clean up by removing the downloaded ZIP file

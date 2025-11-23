@@ -82,15 +82,11 @@ def ppg_intervalrelated(data, sampling_rate=1000):
             intervals[epoch].update(_ppg_intervalrelated_formatinput(data[epoch]))
 
             # HRV
-            intervals[epoch].update(
-                *_ppg_intervalrelated_hrv(data[epoch], sampling_rate)
-            )
+            intervals[epoch].update(*_ppg_intervalrelated_hrv(data[epoch], sampling_rate))
 
         ppg_intervals = pd.DataFrame.from_dict(intervals, orient="index")
     else:
-        raise ValueError(
-            "Input should be a dataframe or a dict of dataframes (epochs)."
-        )
+        raise ValueError("Input should be a dataframe or a dict of dataframes (epochs).")
 
     return ppg_intervals
 

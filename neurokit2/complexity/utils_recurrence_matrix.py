@@ -93,9 +93,7 @@ def recurrence_matrix(signal, delay=1, dimension=3, tolerance="default", show=Fa
       sympathetic and parasympathetic tones by nonlinear indexes in normotensive rats. American
       Journal of Physiology-Heart and Circulatory Physiology, 275(4), H1290-H1297.
     """
-    tolerance, _ = complexity_tolerance(
-        signal, method=tolerance, delay=delay, dimension=dimension, show=False
-    )
+    tolerance, _ = complexity_tolerance(signal, method=tolerance, delay=delay, dimension=dimension, show=False)
 
     # Time-delay embedding
     emb = complexity_embedding(signal, delay=delay, dimension=dimension)

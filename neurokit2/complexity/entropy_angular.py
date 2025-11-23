@@ -65,9 +65,7 @@ def entropy_angular(signal, delay=1, dimension=2, show=False, **kwargs):
     """
     # Sanity checks
     if isinstance(signal, (np.ndarray, pd.DataFrame)) and signal.ndim > 1:
-        raise ValueError(
-            "Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet."
-        )
+        raise ValueError("Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet.")
 
     # 1. Phase space reconstruction (time-delay embeddings)
     embedded = complexity_embedding(signal, delay=delay, dimension=dimension)
@@ -137,9 +135,9 @@ def _kde_sturges(x):
 
     # Compute the kernel density estimate
     xi = (bins[:-1] + bins[1:]) / 2
-    pdf = np.sum(
-        scipy.stats.norm.pdf((xi.reshape(-1, 1) - x.reshape(1, -1)) / bandwidth), axis=1
-    ) / (len(x) * bandwidth)
+    pdf = np.sum(scipy.stats.norm.pdf((xi.reshape(-1, 1) - x.reshape(1, -1)) / bandwidth), axis=1) / (
+        len(x) * bandwidth
+    )
 
     # Normalize the PDF
     pdf = pdf / np.sum(pdf)

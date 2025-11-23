@@ -237,10 +237,7 @@ def _frequency_modulation(periods, seconds, modulation_frequency, modulation_str
     # For example, at a heart rate of 100 and modulation_strenght=1, the heart rate will
     # fluctuate between 150 and 50. At the default modulatiom_strenght=.2, it will
     # fluctuate between 110 and 90.
-    modulator = (
-        0.5 * modulation_strength * np.sin(2 * np.pi * modulation_frequency * seconds)
-        + modulation_mean
-    )
+    modulator = 0.5 * modulation_strength * np.sin(2 * np.pi * modulation_frequency * seconds) + modulation_mean
     periods_modulated = periods * modulator
     seconds_modulated = np.cumsum(periods_modulated)
     seconds_modulated -= seconds_modulated[0]  # make sure seconds start at zero

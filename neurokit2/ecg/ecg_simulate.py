@@ -322,11 +322,7 @@ def _ecg_simulate_ecgsyn(
     if q != qd:
         raise ValueError(
             "Internal sampling frequency (sfint) must be an integer multiple of the ECG sampling frequency"
-            " (sfecg). Your current choices are: sfecg = "
-            + str(sfecg)
-            + " and sfint = "
-            + str(sfint)
-            + "."
+            " (sfecg). Your current choices are: sfecg = " + str(sfecg) + " and sfint = " + str(sfint) + "."
         )
 
     # Define frequency parameters for rr process
@@ -456,8 +452,8 @@ def _ecg_simulate_rrprocess(
     dw1 = w - w1
     dw2 = w - w2
 
-    Hw1 = sig1 * np.exp(-0.5 * (dw1 / c1) ** 2) / np.sqrt(2 * np.pi * c1 ** 2)
-    Hw2 = sig2 * np.exp(-0.5 * (dw2 / c2) ** 2) / np.sqrt(2 * np.pi * c2 ** 2)
+    Hw1 = sig1 * np.exp(-0.5 * (dw1 / c1) ** 2) / np.sqrt(2 * np.pi * c1**2)
+    Hw2 = sig2 * np.exp(-0.5 * (dw2 / c2) ** 2) / np.sqrt(2 * np.pi * c2**2)
     Hw = Hw1 + Hw2
     Hw0 = np.concatenate((Hw[0 : int(n / 2)], Hw[int(n / 2) - 1 :: -1]))
     Sw = (sfrr / 2) * np.sqrt(Hw0)

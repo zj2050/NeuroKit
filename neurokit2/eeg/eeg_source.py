@@ -41,17 +41,13 @@ def eeg_source(raw, src, bem, method="sLORETA", show=False, verbose="WARNING", *
         trans = kwargs.pop("trans")
 
     # Setup source space and compute forward
-    fwd = mne.make_forward_solution(
-        raw.info, trans=trans, src=src, bem=bem, verbose=verbose, **kwargs
-    )
+    fwd = mne.make_forward_solution(raw.info, trans=trans, src=src, bem=bem, verbose=verbose, **kwargs)
 
     # Get noise covariance matrix
     noise_cov = mne.compute_raw_covariance(raw, tmin=0, tmax=None)
 
     # Get inverse solution
-    inverse_operator = mne.minimum_norm.make_inverse_operator(
-        raw.info, fwd, noise_cov, verbose=verbose, **kwargs
-    )
+    inverse_operator = mne.minimum_norm.make_inverse_operator(raw.info, fwd, noise_cov, verbose=verbose, **kwargs)
     src = inverse_operator["src"]
 
     snr = 1.0  # use smaller SNR for raw data
@@ -59,7 +55,7 @@ def eeg_source(raw, src, bem, method="sLORETA", show=False, verbose="WARNING", *
     stc = mne.minimum_norm.apply_inverse_raw(
         raw,
         inverse_operator,
-        lambda2=1.0 / snr ** 2,
+        lambda2=1.0 / snr**2,
         method=method,  # sLORETA method (could also be MNE or dSPM)
         verbose=verbose,
         **kwargs

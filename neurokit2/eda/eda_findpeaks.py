@@ -82,17 +82,13 @@ def eda_findpeaks(eda_phasic, sampling_rate=1000, method="neurokit", amplitude_m
         try:
             eda_phasic = eda_phasic["EDA_Phasic"]
         except KeyError:
-            raise KeyError(
-                "NeuroKit error: eda_findpeaks(): Please provide an array as the input signal."
-            )
+            raise KeyError("NeuroKit error: eda_findpeaks(): Please provide an array as the input signal.")
 
     method = method.lower()  # remove capitalised letters
     if method in ["gamboa2008", "gamboa"]:
         info = _eda_findpeaks_gamboa2008(eda_phasic)
     elif method in ["kim", "kbk", "kim2004", "biosppy"]:
-        info = _eda_findpeaks_kim2004(
-            eda_phasic, sampling_rate=sampling_rate, amplitude_min=amplitude_min
-        )
+        info = _eda_findpeaks_kim2004(eda_phasic, sampling_rate=sampling_rate, amplitude_min=amplitude_min)
     elif method in ["nk", "nk2", "neurokit", "neurokit2"]:
         info = _eda_findpeaks_neurokit(eda_phasic, amplitude_min=amplitude_min)
     elif method in ["vanhalem2020", "vanhalem", "halem2020"]:
@@ -188,9 +184,7 @@ def _eda_findpeaks_gamboa2008(eda_phasic):
 
     # sanity check
     if len(pi) == 0 or len(ni) == 0:
-        raise ValueError(
-            "NeuroKit error: eda_findpeaks(): Could not find enough SCR peaks. Try another method."
-        )
+        raise ValueError("NeuroKit error: eda_findpeaks(): Could not find enough SCR peaks. Try another method.")
 
     # pair vectors
     if ni[0] < pi[0]:

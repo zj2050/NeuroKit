@@ -75,9 +75,7 @@ def cluster_findnumber(data, method="kmeans", n_max=10, show=False, **kwargs):
         results["Score_GAP"] - results["Score_GAP"].shift(-1) + results["Score_GAP_sk"].shift(-1)
     )
     results["Score_GAPmod_diff"] = (
-        results["Score_GAPmod"]
-        - results["Score_GAPmod"].shift(-1)
-        + results["Score_GAPmod_sk"].shift(-1)
+        results["Score_GAPmod"] - results["Score_GAPmod"].shift(-1) + results["Score_GAPmod_sk"].shift(-1)
     )
     results = results.drop(["Score_GAP_sk", "Score_GAPmod_sk"], axis=1)
 

@@ -51,8 +51,7 @@ def rsp_plot(rsp_signals, info=None, static=True):
     """
     if info is None:
         warn(
-            "'info' dict not provided. Some information might be missing."
-            + " Sampling rate will be set to 1000 Hz.",
+            "'info' dict not provided. Some information might be missing." + " Sampling rate will be set to 1000 Hz.",
             category=NeuroKitWarning,
         )
 
@@ -99,9 +98,7 @@ def rsp_plot(rsp_signals, info=None, static=True):
         ax[0].set_title("Raw and Cleaned Signal")
         fig.suptitle("Respiration (RSP)", fontweight="bold")
 
-        ax[0].plot(
-            x_axis, rsp_signals["RSP_Raw"], color="#B0BEC5", label="Raw", zorder=1
-        )
+        ax[0].plot(x_axis, rsp_signals["RSP_Raw"], color="#B0BEC5", label="Raw", zorder=1)
         ax[0].plot(
             x_axis,
             rsp_signals["RSP_Clean"],
@@ -170,9 +167,7 @@ def rsp_plot(rsp_signals, info=None, static=True):
                 label="Amplitude",
                 linewidth=1.5,
             )
-            ax[2].axhline(
-                y=amplitude_mean, label="Mean", linestyle="--", color="#009688"
-            )
+            ax[2].axhline(y=amplitude_mean, label="Mean", linestyle="--", color="#009688")
             ax[2].legend(loc="upper right")
 
         if "RSP_RVT" in list(rsp_signals.columns):
@@ -236,9 +231,7 @@ def rsp_plot(rsp_signals, info=None, static=True):
 
         # Plot cleaned and raw RSP
         fig.add_trace(
-            go.Scatter(
-                x=x_axis, y=rsp_signals["RSP_Raw"], name="Raw", marker_color="#B0BEC5"
-            ),
+            go.Scatter(x=x_axis, y=rsp_signals["RSP_Raw"], name="Raw", marker_color="#B0BEC5"),
             row=1,
             col=1,
         )
@@ -281,9 +274,7 @@ def rsp_plot(rsp_signals, info=None, static=True):
 
         # Plot rate and optionally amplitude.
         fig.add_trace(
-            go.Scatter(
-                x=x_axis, y=rsp_signals["RSP_Rate"], name="Rate", marker_color="#4CAF50"
-            ),
+            go.Scatter(x=x_axis, y=rsp_signals["RSP_Rate"], name="Rate", marker_color="#4CAF50"),
             row=2,
             col=1,
         )

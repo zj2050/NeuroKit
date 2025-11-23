@@ -13,12 +13,7 @@ from .intervals_utils import (
 
 
 def intervals_process(
-    intervals,
-    intervals_time=None,
-    interpolate=False,
-    interpolation_rate=100,
-    detrend=None,
-    **kwargs
+    intervals, intervals_time=None, interpolate=False, interpolation_rate=100, detrend=None, **kwargs
 ):
     """**Interval preprocessing**
 
@@ -94,9 +89,7 @@ def intervals_process(
 
     """
     # Sanitize input
-    intervals, intervals_time, _ = _intervals_sanitize(
-        intervals, intervals_time=intervals_time
-    )
+    intervals, intervals_time, _ = _intervals_sanitize(intervals, intervals_time=intervals_time)
 
     if interpolate is False:
         interpolation_rate = None
@@ -130,7 +123,5 @@ def intervals_process(
             interpolation_rate = _intervals_time_to_sampling_rate(intervals_time)
 
     if detrend is not None:
-        intervals = signal_detrend(
-            intervals, method=detrend, sampling_rate=interpolation_rate
-        )
+        intervals = signal_detrend(intervals, method=detrend, sampling_rate=interpolation_rate)
     return intervals, intervals_time, interpolation_rate

@@ -81,9 +81,7 @@ def signal_decompose(signal, method="emd", n_components=None, **kwargs):
     elif method in ["ssa"]:
         components = _signal_decompose_ssa(signal, n_components=n_components)
     else:
-        raise ValueError(
-            "NeuroKit error: signal_decompose(): 'method' should be one of 'emd' or 'ssa'."
-        )
+        raise ValueError("NeuroKit error: signal_decompose(): 'method' should be one of 'emd' or 'ssa'.")
     return components
 
 
@@ -135,9 +133,7 @@ def _signal_decompose_ssa(signal, n_components=None):
     for i in range(d):
         X_elem = sigma[i] * np.outer(u[:, i], vt[i, :])
         X_rev = X_elem[::-1]
-        components[:, i] = [
-            X_rev.diagonal(j).mean() for j in range(-X_rev.shape[0] + 1, X_rev.shape[1])
-        ]
+        components[:, i] = [X_rev.diagonal(j).mean() for j in range(-X_rev.shape[0] + 1, X_rev.shape[1])]
 
     # Return the components
     return components.T

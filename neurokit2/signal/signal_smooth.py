@@ -93,9 +93,7 @@ def signal_smooth(signal, method="convolution", kernel="boxzen", size=10, alpha=
     # Check length.
     size = int(size)
     if size > length or size < 1:
-        raise TypeError(
-            "NeuroKit error: signal_smooth(): 'size' should be between 1 and length of the signal."
-        )
+        raise TypeError("NeuroKit error: signal_smooth(): 'size' should be between 1 and length of the signal.")
 
     method = method.lower()
 

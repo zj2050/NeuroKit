@@ -46,13 +46,9 @@ def signal_merge(signal1, signal2, time1=[0, 10], time2=[0, 10]):
     sampling_rate1 = len(signal1) / np.diff(time1)[0]
     sampling_rate2 = len(signal2) / np.diff(time2)[0]
     if sampling_rate1 > sampling_rate2:
-        signal2 = signal_resample(
-            signal2, sampling_rate=sampling_rate2, desired_sampling_rate=sampling_rate1
-        )
+        signal2 = signal_resample(signal2, sampling_rate=sampling_rate2, desired_sampling_rate=sampling_rate1)
     elif sampling_rate2 > sampling_rate1:
-        signal1 = signal_resample(
-            signal1, sampling_rate=sampling_rate1, desired_sampling_rate=sampling_rate2
-        )
+        signal1 = signal_resample(signal1, sampling_rate=sampling_rate1, desired_sampling_rate=sampling_rate2)
     sampling_rate = np.max([sampling_rate1, sampling_rate2])
 
     # Fill beginning

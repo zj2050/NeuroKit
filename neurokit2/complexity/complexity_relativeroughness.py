@@ -47,9 +47,7 @@ def complexity_relativeroughness(signal, **kwargs):
     """
     # Sanity checks
     if isinstance(signal, (np.ndarray, pd.DataFrame)) and signal.ndim > 1:
-        raise ValueError(
-            "Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet."
-        )
+        raise ValueError("Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet.")
 
     _, acov = signal_autocor(signal, **kwargs)  # Retrieve the dict
     acov = acov["ACov"][0:2]  # Extract cov at lag 0 and 1

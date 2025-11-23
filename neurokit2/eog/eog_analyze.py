@@ -75,8 +75,7 @@ def eog_analyze(data, sampling_rate=1000, method="auto"):
 
         if len([i for i in colnames if "Label" in i]) == 0:
             raise ValueError(
-                "NeuroKit error: eog_analyze(): Wrong input or method,"
-                "we couldn't extract epochs features."
+                "NeuroKit error: eog_analyze(): Wrong input or method," "we couldn't extract epochs features."
             )
         else:
             features = eog_eventrelated(data)

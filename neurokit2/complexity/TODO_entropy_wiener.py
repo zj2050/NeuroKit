@@ -61,20 +61,16 @@ def entropy_wiener(signal, sampling_rate=1000, **kwargs):
     """
     # Sanity checks
     if isinstance(signal, (np.ndarray, pd.DataFrame)) and signal.ndim > 1:
-        raise ValueError(
-            "Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet."
-        )
+        raise ValueError("Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet.")
 
     # Get magnitude spectrogram
-    _, _, stft = signal_timefrequency(
-        signal, sampling_rate=sampling_rate, method="stft", show=False, **kwargs
-    )
+    _, _, stft = signal_timefrequency(signal, sampling_rate=sampling_rate, method="stft", show=False, **kwargs)
     # https://github.com/librosa/librosa/blob/eb603e7a91598d1e72d3cdeada0ade21a33f9c0c/librosa/core/spectrum.py#L42
 
     power = 2
     amin = 1e-10
 
-    S_thresh = np.maximum(amin, stft ** power)
+    S_thresh = np.maximum(amin, stft**power)
     gmean = np.exp(np.mean(np.log(S_thresh), axis=-2, keepdims=True))[0][0]
     amean = np.mean(S_thresh, axis=-2, keepdims=True)[0][0]
 

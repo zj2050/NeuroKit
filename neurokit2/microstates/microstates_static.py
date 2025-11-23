@@ -60,9 +60,7 @@ def microstates_static(microstates, sampling_rate=1000, show=False):
 
     if show is True:
         fig = plt.figure(constrained_layout=False)
-        spec = matplotlib.gridspec.GridSpec(
-            ncols=2, nrows=2, height_ratios=[1, 1], width_ratios=[1, 1]
-        )
+        spec = matplotlib.gridspec.GridSpec(ncols=2, nrows=2, height_ratios=[1, 1], width_ratios=[1, 1])
 
         ax0 = fig.add_subplot(spec[1, :])
         ax1 = fig.add_subplot(spec[0, :-1])
@@ -119,9 +117,7 @@ def _microstates_duration_plot(durations, types, ax=None):
     else:
         fig = None
 
-    parts = ax.violinplot(
-        data, positions=range(len(states)), vert=False, showmedians=True, showextrema=False
-    )
+    parts = ax.violinplot(data, positions=range(len(states)), vert=False, showmedians=True, showextrema=False)
     for component in parts:
         if isinstance(parts[component], list):
             for part in parts[component]:

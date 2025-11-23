@@ -82,8 +82,7 @@ def ppg_analyze(data, sampling_rate=1000, method="auto"):
 
         if len([i for i in colnames if "Label" in i]) == 0:
             raise ValueError(
-                "NeuroKit error: ppg_analyze(): Wrong input or method,"
-                "we couldn't extract epochs features."
+                "NeuroKit error: ppg_analyze(): Wrong input or method," "we couldn't extract epochs features."
             )
         else:
             features = ppg_eventrelated(data)

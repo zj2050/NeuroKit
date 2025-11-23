@@ -174,9 +174,7 @@ def emg_activation(
                 "NeuroKit error: emg_activation(): 'pelt' method needs 'emg_cleaned' (cleaned or raw EMG) signal to "
                 "be passed."
             )
-        activity = _emg_activation_pelt(
-            emg_cleaned, duration_min=duration_min, **kwargs
-        )
+        activity = _emg_activation_pelt(emg_cleaned, duration_min=duration_min, **kwargs)
 
     elif method == "biosppy":
         if emg_cleaned is None:
@@ -186,9 +184,7 @@ def emg_activation(
             )
         if size is None:
             size = 0.05
-        activity = _emg_activation_biosppy(
-            emg_cleaned, sampling_rate=sampling_rate, size=size, threshold=threshold
-        )
+        activity = _emg_activation_biosppy(emg_cleaned, sampling_rate=sampling_rate, size=size, threshold=threshold)
 
     elif method == "silva":
         if emg_cleaned is None:
@@ -200,9 +196,7 @@ def emg_activation(
             size = 20
         if threshold_size is None:
             threshold_size = 22
-        activity = _emg_activation_silva(
-            emg_cleaned, size=size, threshold=threshold, threshold_size=threshold_size
-        )
+        activity = _emg_activation_silva(emg_cleaned, size=size, threshold=threshold, threshold_size=threshold_size)
 
     else:
         raise ValueError(
@@ -258,8 +252,7 @@ def _emg_activation_threshold(emg_amplitude, threshold="default"):
 
     if threshold > np.max(emg_amplitude):
         raise ValueError(
-            "NeuroKit error: emg_activation(): the threshold specified exceeds the maximum of the signal"
-            "amplitude."
+            "NeuroKit error: emg_activation(): the threshold specified exceeds the maximum of the signal" "amplitude."
         )
 
     activity = signal_binarize(emg_amplitude, method="threshold", threshold=threshold)
@@ -309,9 +302,7 @@ def _emg_activation_pelt(emg_cleaned, threshold="default", duration_min=0.05, **
     return activity
 
 
-def _emg_activation_biosppy(
-    emg_cleaned, sampling_rate=1000, size=0.05, threshold="default"
-):
+def _emg_activation_biosppy(emg_cleaned, sampling_rate=1000, size=0.05, threshold="default"):
     """Adapted from `find_onsets` in Biosppy."""
 
     # check inputs
@@ -369,9 +360,7 @@ def _emg_activation_silva(emg_cleaned, size=20, threshold_size=22, threshold="de
     tf_mvgav = np.convolve(fwlo, np.ones((size,)) / size, mode="valid")
 
     # moving average for calculating the adaptive threshold
-    threshold_mvgav = np.convolve(
-        fwlo, np.ones((threshold_size,)) / threshold_size, mode="valid"
-    )
+    threshold_mvgav = np.convolve(fwlo, np.ones((threshold_size,)) / threshold_size, mode="valid")
 
     onset_time_list = []
     offset_time_list = []
@@ -408,14 +397,10 @@ def _emg_activation_silva(emg_cleaned, size=20, threshold_size=22, threshold="de
 # Internals
 # =============================================================================
 def _emg_activation_activations(activity, duration_min=0.05):
-    activations = events_find(
-        activity, threshold=0.5, threshold_keep="above", duration_min=duration_min
-    )
+    activations = events_find(activity, threshold=0.5, threshold_keep="above", duration_min=duration_min)
     activations["offset"] = activations["onset"] + activations["duration"]
 
-    baseline = events_find(
-        activity == 0, threshold=0.5, threshold_keep="above", duration_min=duration_min
-    )
+    baseline = events_find(activity == 0, threshold=0.5, threshold_keep="above", duration_min=duration_min)
     baseline["offset"] = baseline["onset"] + baseline["duration"]
 
     # Cross-comparison

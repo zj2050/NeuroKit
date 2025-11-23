@@ -64,8 +64,7 @@ def read_bitalino(filename):
                 metadata[k]["Annotations"] = annotations[k]
             else:
                 warn(
-                    f"Device {k} not found in metadata ({metadata.keys()})."
-                    + " Something might be wrong.",
+                    f"Device {k} not found in metadata ({metadata.keys()})." + " Something might be wrong.",
                     category=NeuroKitWarning,
                 )
 

@@ -88,16 +88,14 @@ def rsp_symmetry(
     failed_checks = False
     if len(peaks) <= 4 or len(troughs) <= 4:
         warn(
-            "Not enough peaks and troughs (signal too short?) to compute symmetry"
-            + ", returning nan for symmetry.",
+            "Not enough peaks and troughs (signal too short?) to compute symmetry" + ", returning nan for symmetry.",
             category=NeuroKitWarning,
         )
         failed_checks = True
 
     if np.any(peaks - troughs < 0):
         warn(
-            "Peaks and troughs are not correctly aligned (i.e., not consecutive)"
-            + ", returning nan for symmetry.",
+            "Peaks and troughs are not correctly aligned (i.e., not consecutive)" + ", returning nan for symmetry.",
             category=NeuroKitWarning,
         )
         failed_checks = True
@@ -124,9 +122,7 @@ def rsp_symmetry(
     halfway_locations = np.zeros(len(halfway_values))
     for i in range(len(peaks)):
         segment = rsp_cleaned[troughs[i] : peaks[i]]
-        halfway_locations[i] = (
-            find_closest(halfway_values[i], segment, return_index=True) + troughs[i]
-        )
+        halfway_locations[i] = find_closest(halfway_values[i], segment, return_index=True) + troughs[i]
 
     # Find half-way points (peak to next through)
     halfway_values2 = (rsp_cleaned[peaks[:-1]] - rsp_cleaned[troughs[1::]]) / 2
@@ -134,9 +130,7 @@ def rsp_symmetry(
     halfway_locations2 = np.zeros(len(halfway_values2))
     for i in range(len(peaks[:-1])):
         segment = rsp_cleaned[peaks[i] : troughs[i + 1]]
-        halfway_locations2[i] = (
-            find_closest(halfway_values2[i], segment, return_index=True) + peaks[i]
-        )
+        halfway_locations2[i] = find_closest(halfway_values2[i], segment, return_index=True) + peaks[i]
 
     # Peak-trough symmetry
     asc_to_desc = halfway_locations2[1:] - halfway_locations[1:-1]
@@ -163,9 +157,7 @@ def rsp_symmetry(
         plt.scatter(peaks, normalized[peaks], color="red")
         plt.scatter(troughs, normalized[troughs], color="blue")
         plt.scatter(halfway_locations, normalized[halfway_locations.astype(int)], color="orange")
-        plt.scatter(
-            halfway_locations2, normalized[halfway_locations2.astype(int)], color="darkgreen"
-        )
+        plt.scatter(halfway_locations2, normalized[halfway_locations2.astype(int)], color="darkgreen")
 
         plt.plot(risedecay_symmetry, color="purple", label="Rise-decay symmetry")
         plt.plot(peaktrough_symmetry, color="green", label="Peak-trough symmetry")

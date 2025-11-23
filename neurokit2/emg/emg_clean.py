@@ -71,9 +71,7 @@ def emg_clean(emg_signal, sampling_rate=1000, method="biosppy"):
     elif method in ["biosppy"]:
         clean = _emg_clean_biosppy(emg_signal, sampling_rate=sampling_rate)
     else:
-        raise ValueError(
-            "NeuroKit error: emg_clean(): 'method' should be one of 'biosppy' or 'none'."
-        )
+        raise ValueError("NeuroKit error: emg_clean(): 'method' should be one of 'biosppy' or 'none'.")
     return clean
 
 
@@ -94,9 +92,7 @@ def _emg_clean_biosppy(emg_signal, sampling_rate=1000):
     # Parameters
     order = 4
     frequency = 100
-    frequency = (
-        2 * np.array(frequency) / sampling_rate
-    )  # Normalize frequency to Nyquist Frequency (Fs/2).
+    frequency = 2 * np.array(frequency) / sampling_rate  # Normalize frequency to Nyquist Frequency (Fs/2).
 
     # Filtering
     b, a = scipy.signal.butter(N=order, Wn=frequency, btype="highpass", analog=False)

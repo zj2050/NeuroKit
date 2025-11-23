@@ -233,15 +233,11 @@ def _mutual_information_knn(x, y, k=3):
     dvec = sklearn.neighbors.KDTree(points, metric="chebyshev").query(points, k=k + 1)[0][:, k]
 
     a = np.array([x]).T
-    a = sklearn.neighbors.KDTree(a, metric="chebyshev").query_radius(
-        a, dvec - 1e-15, count_only=True
-    )
+    a = sklearn.neighbors.KDTree(a, metric="chebyshev").query_radius(a, dvec - 1e-15, count_only=True)
     a = np.mean(scipy.special.digamma(a))
 
     b = np.array([y]).T
-    b = sklearn.neighbors.KDTree(b, metric="chebyshev").query_radius(
-        b, dvec - 1e-15, count_only=True
-    )
+    b = sklearn.neighbors.KDTree(b, metric="chebyshev").query_radius(b, dvec - 1e-15, count_only=True)
     b = np.mean(scipy.special.digamma(b))
 
     c = scipy.special.digamma(k)

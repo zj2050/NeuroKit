@@ -145,24 +145,21 @@ def _eda_eventrelated_scr(epoch, output={}):
     # Sanitize input
     if "SCR_Amplitude" not in epoch:
         warn(
-            "Input does not have an `SCR_Amplitude` column."
-            " Will skip computation of SCR peak amplitude.",
+            "Input does not have an `SCR_Amplitude` column." " Will skip computation of SCR peak amplitude.",
             category=NeuroKitWarning,
         )
         return output
 
     if "SCR_RecoveryTime" not in epoch:
         warn(
-            "Input does not have an `SCR_RecoveryTime` column."
-            " Will skip computation of SCR half-recovery times.",
+            "Input does not have an `SCR_RecoveryTime` column." " Will skip computation of SCR half-recovery times.",
             category=NeuroKitWarning,
         )
         return output
 
     if "SCR_RiseTime" not in epoch:
         warn(
-            "Input does not have an `SCR_RiseTime` column."
-            " Will skip computation of SCR rise times.",
+            "Input does not have an `SCR_RiseTime` column." " Will skip computation of SCR rise times.",
             category=NeuroKitWarning,
         )
         return output

@@ -75,9 +75,7 @@ def fractal_higuchi(signal, k_max="default", show=False, **kwargs):
 
     # Sanity checks
     if isinstance(signal, (np.ndarray, pd.DataFrame)) and signal.ndim > 1:
-        raise ValueError(
-            "Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet."
-        )
+        raise ValueError("Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet.")
 
     # Get k_max
     if isinstance(k_max, (str, list, np.ndarray, pd.Series)):
@@ -120,10 +118,7 @@ def _fractal_higuchi_plot(k_values, average_values, kmax, slope, intercept, ax=N
         fig = None
 
     ax.set_title(
-        "Least-squares linear best-fit curve for $k_{max}$ = "
-        + str(kmax)
-        + ", slope = "
-        + str(np.round(slope, 2))
+        "Least-squares linear best-fit curve for $k_{max}$ = " + str(kmax) + ", slope = " + str(np.round(slope, 2))
     )
     ax.set_ylabel(r"$ln$(L(k))")
     ax.set_xlabel(r"$ln$(1/k)")

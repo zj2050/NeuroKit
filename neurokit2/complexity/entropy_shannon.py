@@ -118,9 +118,7 @@ def entropy_shannon(signal=None, base=2, symbolize=None, show=False, freq=None, 
 def _entropy_freq(signal, symbolize=None, show=False):
     # Sanity checks
     if isinstance(signal, (np.ndarray, pd.DataFrame)) and signal.ndim > 1:
-        raise ValueError(
-            "Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet."
-        )
+        raise ValueError("Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet.")
 
     # Check if string ('ABBA'), and convert each character to list (['A', 'B', 'B', 'A'])
     if isinstance(signal, str):

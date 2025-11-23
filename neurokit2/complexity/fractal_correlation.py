@@ -91,9 +91,7 @@ def fractal_correlation(signal, delay=1, dimension=2, radius=64, show=False, **k
     """
     # Sanity checks
     if isinstance(signal, (np.ndarray, pd.DataFrame)) and signal.ndim > 1:
-        raise ValueError(
-            "Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet."
-        )
+        raise ValueError("Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet.")
 
     # Get embedded
     embedded = complexity_embedding(signal, delay=delay, dimension=dimension)
@@ -142,7 +140,7 @@ def _fractal_correlation_get_r(radius, signal, dist):
             min_r, max_r, factor = 0.1 * sd, 0.5 * sd, 1.03
 
             r_n = int(np.floor(np.log(1.0 * max_r / min_r) / np.log(factor)))
-            r_vals = np.array([min_r * (factor ** i) for i in range(r_n + 1)])
+            r_vals = np.array([min_r * (factor**i) for i in range(r_n + 1)])
 
         elif radius == "Corr_Dim":
             r_min, r_max = np.min(dist[np.where(dist > 0)]), np.exp(np.floor(np.log(np.max(dist))))

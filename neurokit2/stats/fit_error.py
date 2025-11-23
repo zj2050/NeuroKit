@@ -115,5 +115,5 @@ def _fit_error_prepare(y, y_predicted, n_parameters=2):
     df = n - n_parameters
 
     # Calculate sum of squared errors
-    SSE = np.sum(residual ** 2)
+    SSE = np.sum(residual**2)
     return SSE, n, df

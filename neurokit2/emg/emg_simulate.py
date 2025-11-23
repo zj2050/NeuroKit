@@ -111,8 +111,6 @@ def emg_simulate(
     emg += rng.normal(0, noise, len(emg))
 
     # Resample
-    emg = signal_resample(
-        emg, sampling_rate=1000, desired_length=length, desired_sampling_rate=sampling_rate
-    )
+    emg = signal_resample(emg, sampling_rate=1000, desired_length=length, desired_sampling_rate=sampling_rate)
 
     return emg

@@ -70,9 +70,7 @@ def entropy_cumulativeresidual(signal, symbolize=None, show=False, freq=None):
     """
     # Sanity checks
     if isinstance(signal, (np.ndarray, pd.DataFrame)) and signal.ndim > 1:
-        raise ValueError(
-            "Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet."
-        )
+        raise ValueError("Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet.")
 
     if freq is None:
         events, freq = _entropy_freq(signal, symbolize=symbolize, show=show)

@@ -41,9 +41,7 @@ def epochs_average(epochs, which=None, show=False, **kwargs):
     """
     data = epochs_to_df(epochs)
 
-    assert (
-        "Time" in data.columns
-    ), "Something is wrong with the epochs data, could not find a 'Time' column in them."
+    assert "Time" in data.columns, "Something is wrong with the epochs data, could not find a 'Time' column in them."
 
     # Select only the first column
     if which is None:

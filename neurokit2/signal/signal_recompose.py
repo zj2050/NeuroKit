@@ -79,9 +79,7 @@ def _signal_recompose_sum(components, clusters):
     clusters = [np.where(clusters == cluster)[0] for cluster in np.unique(clusters)]
 
     if len(clusters) == 0:
-        raise ValueError(
-            "Not enough clusters of components detected. Please decrease the " "`threshold`."
-        )
+        raise ValueError("Not enough clusters of components detected. Please decrease the " "`threshold`.")
     # Initialize components matrix
     recomposed = np.zeros((len(components), len(clusters)))
     for i, indices in enumerate(clusters):
@@ -92,6 +90,7 @@ def _signal_recompose_sum(components, clusters):
 # =============================================================================
 # Clustering Methods
 # =============================================================================
+
 
 # Weighted Correlation
 # ----------------------------------------------------------------------------
@@ -131,15 +130,13 @@ def _signal_recompose_get_wcorr(components, show=False):
 
     # Calculated weighted norms, ||F_i||_w, then invert.
     F_wnorms = np.array([w_inner(components[:, i], components[:, i]) for i in range(L)])
-    F_wnorms = F_wnorms ** -0.5
+    F_wnorms = F_wnorms**-0.5
 
     # Calculate Wcorr.
     Wcorr = np.identity(L)
     for i in range(L):
         for j in range(i + 1, L):
-            Wcorr[i, j] = abs(
-                w_inner(components[:, i], components[:, j]) * F_wnorms[i] * F_wnorms[j]
-            )
+            Wcorr[i, j] = abs(w_inner(components[:, i], components[:, j]) * F_wnorms[i] * F_wnorms[j])
             Wcorr[j, i] = Wcorr[i, j]
 
     if show is True:

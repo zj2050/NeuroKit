@@ -68,9 +68,7 @@ def entropy_coalition(signal, method="amplitude"):
     if isinstance(signal, pd.DataFrame):
         # return signal in (len(channels), len(samples)) format
         signal = signal.values.transpose()
-    elif (isinstance(signal, np.ndarray) and len(signal.shape) == 1) or isinstance(
-        signal, (list, pd.Series)
-    ):
+    elif (isinstance(signal, np.ndarray) and len(signal.shape) == 1) or isinstance(signal, (list, pd.Series)):
         raise ValueError(
             "entropy_coalition(): The input must be a dataframe containing multiple signals.",
         )
@@ -101,17 +99,13 @@ def _entropy_coalition_synchrony(signal):
 
     # Get binary matrices of synchrony for each series
     transformed = np.angle(scipy.signal.hilbert(signal))
-    matrix = np.zeros(
-        (n_channels, n_channels - 1, n_samples)
-    )  # store array of synchrony series for each channel
+    matrix = np.zeros((n_channels, n_channels - 1, n_samples))  # store array of synchrony series for each channel
 
     for i in range(n_channels):
         index = 0
         for j in range(n_channels):
             if i != j:
-                matrix[i, index] = _entropy_coalition_synchrony_phase(
-                    transformed[i], transformed[j]
-                )
+                matrix[i, index] = _entropy_coalition_synchrony_phase(transformed[i], transformed[j])
                 index += 1
 
     # Create random binary matrix for normalization
@@ -174,6 +168,6 @@ def _entropy_coalition_map(binary_sequence):
     mapped = np.zeros(n_samples)
     for t in range(n_samples):
         for j in range(n_channels):
-            mapped[t] += binary_sequence[j, t] * (2 ** j)
+            mapped[t] += binary_sequence[j, t] * (2**j)
 
     return mapped

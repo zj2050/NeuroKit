@@ -281,14 +281,10 @@ def _hrv_TINN(rri, bar_x, bar_y, binsize):
         while m < np.max(rri):
             n_start = np.where(bar_x == n)[0][0]
             n_end = np.where(bar_x == X)[0][0]
-            qn = np.polyval(
-                np.polyfit([n, X], [0, Y], deg=1), bar_x[n_start : n_end + 1]
-            )
+            qn = np.polyval(np.polyfit([n, X], [0, Y], deg=1), bar_x[n_start : n_end + 1])
             m_start = np.where(bar_x == X)[0][0]
             m_end = np.where(bar_x == m)[0][0]
-            qm = np.polyval(
-                np.polyfit([X, m], [Y, 0], deg=1), bar_x[m_start : m_end + 1]
-            )
+            qm = np.polyval(np.polyfit([X, m], [Y, 0], deg=1), bar_x[m_start : m_end + 1])
             q = np.zeros(len(bar_x))
             q[n_start : n_end + 1] = qn
             q[m_start : m_end + 1] = qm

@@ -246,10 +246,7 @@ def _eda_phasic_cvxeda(
     spl = np.convolve(spl, spl, "full")
     spl /= max(spl)
     # matrix of spline regressors
-    i = (
-        np.c_[np.arange(-(len(spl) // 2), (len(spl) + 1) // 2)]
-        + np.r_[np.arange(0, n, delta_knot_s)]
-    )
+    i = np.c_[np.arange(-(len(spl) // 2), (len(spl) + 1) // 2)] + np.r_[np.arange(0, n, delta_knot_s)]
     nB = i.shape[1]
     j = np.tile(np.arange(nB), (len(spl), 1))
     p = np.tile(spl, (nB, 1)).T
@@ -277,9 +274,7 @@ def _eda_phasic_cvxeda(
             ]
         )
         h = cvxopt.matrix([_cvx(n, 1), 0.5, 0.5, eda, 0.5, 0.5, _cvx(nB, 1)])
-        c = cvxopt.matrix(
-            [(cvxopt.matrix(alpha, (1, n)) * A).T, _cvx(nC, 1), 1, gamma, _cvx(nB, 1)]
-        )
+        c = cvxopt.matrix([(cvxopt.matrix(alpha, (1, n)) * A).T, _cvx(nC, 1), 1, gamma, _cvx(nB, 1)])
         res = cvxopt.solvers.conelp(c, G, h, dims={"l": n, "q": [n + 2, nB + 2], "s": []})
     else:
         # Use qp
@@ -291,9 +286,7 @@ def _eda_phasic_cvxeda(
                 [Mt * B, Ct * B, Bt * B + gamma * cvxopt.spmatrix(1.0, range(nB), range(nB))],
             ]
         )
-        f = cvxopt.matrix(
-            [(cvxopt.matrix(alpha, (1, n)) * A).T - Mt * eda, -(Ct * eda), -(Bt * eda)]
-        )
+        f = cvxopt.matrix([(cvxopt.matrix(alpha, (1, n)) * A).T - Mt * eda, -(Ct * eda), -(Bt * eda)])
         res = cvxopt.solvers.qp(
             H,
             f,
@@ -318,9 +311,7 @@ def _eda_phasic_cvxeda(
 # =============================================================================
 
 
-def _eda_phasic_sparsEDA(
-    eda_signal, sampling_rate=8, epsilon=0.0001, Kmax=40, Nmin=5 / 4, rho=0.025
-):
+def _eda_phasic_sparsEDA(eda_signal, sampling_rate=8, epsilon=0.0001, Kmax=40, Nmin=5 / 4, rho=0.025):
     """ "
     Credits go to:
     - https://github.com/fhernandogallego/sparsEDA (Matlab original implementation)
@@ -394,9 +385,7 @@ def _eda_phasic_sparsEDA(
 
         rf_est_zeropad = np.zeros(len(rf_est) + (N - len(rf_est)))
         rf_est_zeropad[: len(rf_est)] = rf_est
-        Rzeros[0:N, j * Lreg : (j + 1) * Lreg] = scipy.linalg.toeplitz(
-            rf_est_zeropad, np.zeros(Lreg)
-        )
+        Rzeros[0:N, j * Lreg : (j + 1) * Lreg] = scipy.linalg.toeplitz(rf_est_zeropad, np.zeros(Lreg))
 
     R0 = Rzeros[0:N, 0 : 5 * Lreg]
     R = np.zeros([N, T + Lreg * 5])
@@ -457,16 +446,14 @@ def _eda_phasic_sparsEDA(
         b0 = np.matmul(R[jump * 20 * new_sr - 1, 0:6], beta[0:6, :]) + b0
 
         driverAux[cutS : cutS + (jump * 20 * new_sr)] = driver[0 : jump * new_sr * 20]
-        slcAux[cutS : cutS + (jump * 20 * new_sr)] = SCL[
-            0 : jump * new_sr * 20
-        ].reshape(-1)
+        slcAux[cutS : cutS + (jump * 20 * new_sr)] = SCL[0 : jump * new_sr * 20].reshape(-1)
         resAux[cutS : cutS + (jump * 20 * new_sr)] = remAout[0 : jump * new_sr * 20]
         cutS = cutS + jump * 20 * new_sr
         cutE = cutS + N
 
     SCRaux = driverAux[pointerS:pointerE]
     SCL = slcAux[pointerS:pointerE]
-    #MSE = resAux[pointerS:pointerE]
+    # MSE = resAux[pointerS:pointerE]
 
     # PP
     ind = np.argwhere(SCRaux > 0).reshape(-1)
@@ -489,7 +476,7 @@ def _eda_phasic_sparsEDA(
     driver[driver < threshold] = 0
 
     # Resample back to original sampling rate
-    SCR = eda_signal-SCL
+    SCR = eda_signal - SCL
     SCR = signal_resample(SCR, desired_length=original_length)
     SCL = signal_resample(SCL, desired_length=original_length)
     return SCL, SCR
@@ -514,9 +501,7 @@ def lasso(R, s, sampling_rate, maxIters, epsilon):
     lmbda = np.max(c)
 
     if lmbda < 0:
-        raise Exception(
-            "y is not expressible as a non-negative linear combination of the columns of X"
-        )
+        raise Exception("y is not expressible as a non-negative linear combination of the columns of X")
 
     newIndices = np.argwhere(np.abs(c - lmbda) < zeroTol).flatten()
 
@@ -575,13 +560,9 @@ def lasso(R, s, sampling_rate, maxIters, epsilon):
                 R_I.reshape([-1, 1]), z, transposed=False, lower=False
             )
         else:
-            dx[np.array(activeSet).flatten()] = scipy.linalg.solve(
-                R_I, z, transposed=False, lower=False
-            ).flatten()
+            dx[np.array(activeSet).flatten()] = scipy.linalg.solve(R_I, z, transposed=False, lower=False).flatten()
 
-        v = np.matmul(
-            R[:, np.array(activeSet).flatten()], dx[np.array(activeSet).flatten()].reshape(-1, 1)
-        )
+        v = np.matmul(R[:, np.array(activeSet).flatten()], dx[np.array(activeSet).flatten()].reshape(-1, 1))
         ATv = np.matmul(R.transpose(), v).flatten()
 
         gammaI = np.inf
@@ -636,9 +617,7 @@ def lasso(R, s, sampling_rate, maxIters, epsilon):
         if gammaIc <= gammaI and len(newIndices) > 0:
             for j in range(0, len(newIndices)):
                 iter = iter + 1
-                R_I, flag = updateChol(
-                    R_I, N, W, R, 1, np.array(activeSet).flatten(), newIndices[j], zeroTol
-                )
+                R_I, flag = updateChol(R_I, N, W, R, 1, np.array(activeSet).flatten(), newIndices[j], zeroTol)
 
                 if flag:
                     collinearIndices.append(newIndices[j])

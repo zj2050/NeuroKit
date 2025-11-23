@@ -6,8 +6,14 @@ from ..signal import signal_interpolate, signal_cyclesegment
 
 
 def signal_quality(
-    signal, sampling_rate=1000, cycle_inds=None, signal_type=None, method="templatematch", primary_detector=None,
-    secondary_detector=None, tolerance_window_ms=50
+    signal,
+    sampling_rate=1000,
+    cycle_inds=None,
+    signal_type=None,
+    method="templatematch",
+    primary_detector=None,
+    secondary_detector=None,
+    tolerance_window_ms=50,
 ):
     """**Assess quality of signal by comparing individual cycle morphologies with a template**
 
@@ -145,7 +151,10 @@ def signal_quality(
     # Run selected quality assessment method
     if method in ["templatematch"]:  # Based on the approach in Orphanidou et al. (2015) and Charlton et al. (2021)
         quality = _quality_templatematch(
-            signal, cycle_inds=cycle_inds, signal_type=signal_type, sampling_rate=sampling_rate,
+            signal,
+            cycle_inds=cycle_inds,
+            signal_type=signal_type,
+            sampling_rate=sampling_rate,
         )
     elif method in ["dissimilarity"]:  # Based on the approach in Sabeti et al. (2019)
         quality = _quality_dissimilarity(
@@ -153,11 +162,17 @@ def signal_quality(
         )
     elif method in ["ici", "ho2025"]:  # Based on the approach in Ho et al. (2025)
         quality = _quality_ici(
-            signal, signal_type=signal_type, primary_detector=primary_detector, secondary_detector=secondary_detector,
-            sampling_rate=sampling_rate,tolerance_window_ms=tolerance_window_ms
+            signal,
+            signal_type=signal_type,
+            primary_detector=primary_detector,
+            secondary_detector=secondary_detector,
+            sampling_rate=sampling_rate,
+            tolerance_window_ms=tolerance_window_ms,
         )
     else:
-        raise ValueError(f'The `{method}` method does not exist in signal_quality. Please choose one of: `templatematch`, `dissimilarity` or `ici`')
+        raise ValueError(
+            f"The `{method}` method does not exist in signal_quality. Please choose one of: `templatematch`, `dissimilarity` or `ici`"
+        )
 
     return quality
 
@@ -171,9 +186,7 @@ def _calc_template_morph(signal, cycle_inds, signal_type, sampling_rate=1000):
     cycles, average_cycle_rate = signal_cyclesegment(signal, cycle_inds, sampling_rate=sampling_rate)
 
     # convert these to dataframe
-    ind_morph = epochs_to_df(cycles).pivot(
-        index="Label", columns="Time", values="Signal"
-    )
+    ind_morph = epochs_to_df(cycles).pivot(index="Label", columns="Time", values="Signal")
     ind_morph.index = ind_morph.index.astype(int)
     ind_morph = ind_morph.sort_index()
 
@@ -191,9 +204,7 @@ def _calc_template_morph(signal, cycle_inds, signal_type, sampling_rate=1000):
 # =============================================================================
 # Quality assessment using template-matching method
 # =============================================================================
-def _quality_templatematch(
-    signal, cycle_inds=None, signal_type="ppg", sampling_rate=1000
-):
+def _quality_templatematch(signal, cycle_inds=None, signal_type="ppg", sampling_rate=1000):
 
     # Obtain individual cycle morphologies and template cycle morphology
     templ_morph, ind_morph, cycle_inds = _calc_template_morph(
@@ -210,9 +221,7 @@ def _quality_templatematch(
         cc[cycle_no] = temp[0, 1]
 
     # Interpolate cycle-by-cycle CCs
-    quality = signal_interpolate(
-        cycle_inds[0:-1], cc, x_new=np.arange(len(signal)), method="previous"
-    )
+    quality = signal_interpolate(cycle_inds[0:-1], cc, x_new=np.arange(len(signal)), method="previous")
 
     return quality
 
@@ -254,9 +263,7 @@ def _calc_dis(pw1, pw2):
 # =============================================================================
 # Quality assessment using dissimilarity method
 # =============================================================================
-def _quality_dissimilarity(
-    signal, cycle_inds=None, signal_type="ppg", sampling_rate=1000
-):
+def _quality_dissimilarity(signal, cycle_inds=None, signal_type="ppg", sampling_rate=1000):
 
     # Obtain individual cycle morphologies and template cycle morphology
     templ_morph, ind_morph, cycle_inds = _calc_template_morph(
@@ -272,9 +279,7 @@ def _quality_dissimilarity(
         dis[cycle_no] = _calc_dis(ind_morph.iloc[cycle_no], templ_morph)
 
     # Interpolate cycle-by-cycle dis's
-    quality = signal_interpolate(
-        cycle_inds[0:-1], dis, x_new=np.arange(len(signal)), method="previous"
-    )
+    quality = signal_interpolate(cycle_inds[0:-1], dis, x_new=np.arange(len(signal)), method="previous")
 
     return quality
 
@@ -282,9 +287,7 @@ def _quality_dissimilarity(
 # =============================================================================
 # Quality assessment using ICI method
 # =============================================================================
-def _quality_ici(
-            signal, signal_type, primary_detector, secondary_detector, sampling_rate, tolerance_window_ms=50
-        ):
+def _quality_ici(signal, signal_type, primary_detector, secondary_detector, sampling_rate, tolerance_window_ms=50):
 
     # Specify default cycle (e.g. beat) detectors
     if primary_detector is None:
@@ -361,7 +364,7 @@ def _signal_cycles(signal, signal_type, cycle_detector, sampling_rate):
     from ..ppg import ppg_peaks
     from ..ecg import ecg_peaks
 
-    if signal_type=="ecg":
+    if signal_type == "ecg":
 
         # Detect beats in ECG signal
         signals, info = ecg_peaks(
@@ -373,7 +376,7 @@ def _signal_cycles(signal, signal_type, cycle_detector, sampling_rate):
         # Extract cycles
         cycles = info["ECG_R_Peaks"]
 
-    elif signal_type=="ppg":
+    elif signal_type == "ppg":
 
         # Detect beats in PPG signal
         signals, info = ppg_peaks(

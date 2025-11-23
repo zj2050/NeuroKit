@@ -88,14 +88,12 @@ def signal_period(
         # insert desired_length if not provided:
         if desired_length is None:
             desired_length = len(peaks)
-        
+
         return np.full(desired_length, np.nan)
 
     if isinstance(desired_length, (int, float)):
         if desired_length <= peaks[-1]:
-            raise ValueError(
-                "NeuroKit error: desired_length must be None or larger than the index of the last peak."
-            )
+            raise ValueError("NeuroKit error: desired_length must be None or larger than the index of the last peak.")
 
     # Calculate period in sec, based on peak to peak difference and make sure
     # that rate has the same number of elements as peaks (important for
@@ -105,8 +103,6 @@ def signal_period(
 
     # Interpolate all statistics to desired length.
     if desired_length != ():
-        period = signal_interpolate(
-            peaks, period, x_new=np.arange(desired_length), method=interpolation_method
-        )
+        period = signal_interpolate(peaks, period, x_new=np.arange(desired_length), method=interpolation_method)
 
     return period

@@ -3,9 +3,7 @@ import numpy as np
 import scipy
 
 
-def complexity_attractor(
-    embedded="lorenz", alpha="time", color="last_dim", shadows=True, linewidth=1, **kwargs
-):
+def complexity_attractor(embedded="lorenz", alpha="time", color="last_dim", shadows=True, linewidth=1, **kwargs):
     """**Attractor Graph**
 
     Create an attractor graph from an :func:`embedded <complexity_embedding>` time series.
@@ -158,9 +156,7 @@ def complexity_attractor(
         ax = plt.axes(projection=None)
         # Fast
         if len(np.unique(colors)) == 1 and len(np.unique(alpha)) == 1:
-            ax.plot(
-                embedded[:, 0], embedded[:, 1], color=colors[0], alpha=alpha[0], linewidth=linewidth
-            )
+            ax.plot(embedded[:, 0], embedded[:, 1], color=colors[0], alpha=alpha[0], linewidth=linewidth)
         # Slow (color and/or alpha)
         else:
             ax = _attractor_2D(ax, embedded, colors, alpha, linewidth)

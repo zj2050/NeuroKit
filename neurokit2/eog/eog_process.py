@@ -84,9 +84,7 @@ def eog_process(veog_signal, sampling_rate=1000, **kwargs):
     signal_blinks = _signal_from_indices(peaks, desired_length=len(eog_cleaned))
 
     # Rate computation
-    rate = signal_rate(
-        peaks, sampling_rate=sampling_rate, desired_length=len(eog_cleaned)
-    )
+    rate = signal_rate(peaks, sampling_rate=sampling_rate, desired_length=len(eog_cleaned))
 
     # Prepare output
     signals = pd.DataFrame(

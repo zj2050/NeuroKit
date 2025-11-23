@@ -11,9 +11,7 @@ from ..stats import standardize
 from .optim_complexity_tolerance import complexity_tolerance
 
 
-def complexity_symbolize(
-    signal, method="mean", c=3, random_state=None, show=False, **kwargs
-):
+def complexity_symbolize(signal, method="mean", c=3, random_state=None, show=False, **kwargs):
     """**Signal Symbolization and Discretization**
 
     Many complexity indices are made to assess the recurrence and predictability of discrete -
@@ -169,9 +167,7 @@ def complexity_symbolize(
     if method is None:
         symbolic = signal
         if show is True:
-            df = pd.DataFrame(
-                {"Signal": signal, "Bin": signal, "Index": np.arange(len(signal))}
-            )
+            df = pd.DataFrame({"Signal": signal, "Bin": signal, "Index": np.arange(len(signal))})
             df = df.pivot_table(index="Index", columns="Bin", values="Signal")
             for i in df.columns:
                 plt.plot(df[i])
@@ -232,22 +228,16 @@ def complexity_symbolize(
             if show is True:
                 where = np.where(symbolic)[0]
                 plt.plot(signal, zorder=1 == 1)
-                plt.scatter(
-                    where, signal[where], color="orange", label="Inversion", zorder=2
-                )
+                plt.scatter(where, signal[where], color="orange", label="Inversion", zorder=2)
                 plt.title("Method D")
 
         elif method == "r":
-            symbolic = (
-                np.abs(np.diff(signal)) > complexity_tolerance(signal, method="sd")[0]
-            )
+            symbolic = np.abs(np.diff(signal)) > complexity_tolerance(signal, method="sd")[0]
             symbolic = symbolic.astype(int)
             if show is True:
                 where = np.where(symbolic == 1)[0]
                 plt.plot(signal, zorder=1)
-                plt.scatter(
-                    where, signal[where], color="orange", label="Inversion", zorder=2
-                )
+                plt.scatter(where, signal[where], color="orange", label="Inversion", zorder=2)
                 plt.title("Method based on tolerance r")
 
         elif method in [
@@ -264,14 +254,10 @@ def complexity_symbolize(
                 symbolic = pd.cut(signal, bins=c, labels=False)
 
             elif method == "mep":
-                Temp = np.hstack(
-                    (0, np.ceil(np.arange(1, c) * len(signal) / c) - 1)
-                ).astype(int)
+                Temp = np.hstack((0, np.ceil(np.arange(1, c) * len(signal) / c) - 1)).astype(int)
                 symbolic = np.digitize(signal, np.sort(signal)[Temp])
             elif method == "ncdf":
-                symbolic = np.digitize(
-                    scipy.special.ndtr(standardize(signal)), np.arange(0, 1, 1 / c)
-                )
+                symbolic = np.digitize(scipy.special.ndtr(standardize(signal)), np.arange(0, 1, 1 / c))
             elif method == "linear":
                 symbolic = np.digitize(
                     signal,
@@ -279,9 +265,7 @@ def complexity_symbolize(
                 )
             elif method == "uniform":
                 symbolic = np.zeros(len(signal))
-                symbolic[np.argsort(signal)] = np.digitize(
-                    np.arange(n), np.arange(0, 2 * n, n / c)
-                )
+                symbolic[np.argsort(signal)] = np.digitize(np.arange(n), np.arange(0, 2 * n, n / c))
             elif method == "kmeans":
                 centroids, labels = scipy.cluster.vq.kmeans2(signal, c, seed=rng)
                 labels += 1
@@ -297,9 +281,7 @@ def complexity_symbolize(
                     symbolic[ix[xx[k] : xx[k + 1]]] = k + 1
 
             if show is True:
-                df = pd.DataFrame(
-                    {"Signal": signal, "Bin": symbolic, "Index": np.arange(len(signal))}
-                )
+                df = pd.DataFrame({"Signal": signal, "Bin": symbolic, "Index": np.arange(len(signal))})
                 df = df.pivot_table(index="Index", columns="Bin", values="Signal")
                 for i in df.columns:
                     plt.plot(df[i])

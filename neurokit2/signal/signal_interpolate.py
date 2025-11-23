@@ -8,9 +8,7 @@ import scipy.interpolate
 from ..misc import NeuroKitWarning
 
 
-def signal_interpolate(
-    x_values, y_values=None, x_new=None, method="quadratic", fill_value=None
-):
+def signal_interpolate(x_values, y_values=None, x_new=None, method="quadratic", fill_value=None):
     """**Interpolate a signal**
 
     Interpolate a signal using different methods.
@@ -91,9 +89,7 @@ def signal_interpolate(
     """
     # Sanity checks
     if x_values is None:
-        raise ValueError(
-            "NeuroKit error: signal_interpolate(): x_values must be provided."
-        )
+        raise ValueError("NeuroKit error: signal_interpolate(): x_values must be provided.")
     if y_values is None:
         # for interpolating NaNs
         return _signal_interpolate_nan(x_values, method=method, fill_value=fill_value)
@@ -120,22 +116,16 @@ def signal_interpolate(
                 "Duplicate x values detected. Averaging their corresponding y values.",
                 category=NeuroKitWarning,
             )
-            x_values, y_values = _signal_interpolate_average_duplicates(
-                x_values, y_values
-            )
+            x_values, y_values = _signal_interpolate_average_duplicates(x_values, y_values)
 
     # If only one value, return a constant signal
     if len(x_values) == 1:
         return np.ones(len(x_new)) * y_values[0]
 
     if method == "monotone_cubic":
-        interpolation_function = scipy.interpolate.PchipInterpolator(
-            x_values, y_values, extrapolate=True
-        )
+        interpolation_function = scipy.interpolate.PchipInterpolator(x_values, y_values, extrapolate=True)
     elif method == "akima":
-        interpolation_function = scipy.interpolate.Akima1DInterpolator(
-            x_values, y_values
-        )
+        interpolation_function = scipy.interpolate.Akima1DInterpolator(x_values, y_values)
     else:
         if fill_value is None:
             fill_value = ([y_values[0]], [y_values[-1]])

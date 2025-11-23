@@ -6,9 +6,7 @@ from ..signal import signal_interpolate
 from .utils_complexity_embedding import complexity_embedding
 
 
-def complexity_coarsegraining(
-    signal, scale=2, method="nonoverlapping", show=False, **kwargs
-):
+def complexity_coarsegraining(signal, scale=2, method="nonoverlapping", show=False, **kwargs):
     """**Coarse-graining of a signal**
 
     The goal of coarse-graining is to represent the signal at a different "scale". The
@@ -178,18 +176,14 @@ def complexity_coarsegraining(
 
         if method in ["resampling", "interpolate"]:
             x_values = (np.arange(len(coarse)) * scale + scale / 2).astype(int)
-            coarse = signal_interpolate(
-                x_values, coarse, x_new=np.arange(n), method="monotone_cubic"
-            )
+            coarse = signal_interpolate(x_values, coarse, x_new=np.arange(n), method="monotone_cubic")
 
     elif method == "rolling":
         # See https://github.com/neuropsychology/NeuroKit/pull/892
         coarse = complexity_embedding(signal, dimension=scale, delay=1).mean(axis=1)
 
     elif method == "timeshift":
-        coarse = np.transpose(
-            np.reshape(signal[: scale * (n // scale)], (n // scale, scale))
-        )
+        coarse = np.transpose(np.reshape(signal[: scale * (n // scale)], (n // scale, scale)))
 
     else:
         raise ValueError("Unknown `method`: {}".format(method))
@@ -211,9 +205,7 @@ def _complexity_coarsegraining_show(signal, coarse, method="nonoverlapping"):
             color="red",
             linewidth=0.75,
         )
-        plt.scatter(
-            np.linspace(0, len(signal), len(coarse)), coarse, color="red", linewidth=0.5
-        )
+        plt.scatter(np.linspace(0, len(signal), len(coarse)), coarse, color="red", linewidth=0.5)
     elif method == "timeshift":
         for i in range(len(coarse)):
             plt.plot(
@@ -223,9 +215,7 @@ def _complexity_coarsegraining_show(signal, coarse, method="nonoverlapping"):
                 linewidth=0.75,
             )
     else:
-        plt.plot(
-            np.linspace(0, len(signal), len(coarse)), coarse, color="red", linewidth=1
-        )
+        plt.plot(np.linspace(0, len(signal), len(coarse)), coarse, color="red", linewidth=1)
     plt.title(f'Coarse-graining using method "{method}"')
 
 

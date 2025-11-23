@@ -64,9 +64,7 @@ def entropy_sample(signal, delay=1, dimension=2, tolerance="sd", **kwargs):
     """
     # Sanity checks
     if isinstance(signal, (np.ndarray, pd.DataFrame)) and signal.ndim > 1:
-        raise ValueError(
-            "Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet."
-        )
+        raise ValueError("Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet.")
 
     # Store parameters
     info = {
@@ -82,12 +80,7 @@ def entropy_sample(signal, delay=1, dimension=2, tolerance="sd", **kwargs):
 
     # Compute phi
     info["phi"], _ = _phi(
-        signal,
-        delay=delay,
-        dimension=dimension,
-        tolerance=info["Tolerance"],
-        approximate=False,
-        **kwargs
+        signal, delay=delay, dimension=dimension, tolerance=info["Tolerance"], approximate=False, **kwargs
     )
 
     return _phi_divide(info["phi"]), info

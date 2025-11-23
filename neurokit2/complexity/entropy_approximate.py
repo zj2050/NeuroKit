@@ -6,9 +6,7 @@ from .optim_complexity_tolerance import _entropy_apen, complexity_tolerance
 from .utils_entropy import _get_count
 
 
-def entropy_approximate(
-    signal, delay=1, dimension=2, tolerance="sd", corrected=False, **kwargs
-):
+def entropy_approximate(signal, delay=1, dimension=2, tolerance="sd", corrected=False, **kwargs):
     """**Approximate entropy (ApEn) and its corrected version (cApEn)**
 
     Approximate entropy is a technique used to quantify the amount of regularity and the
@@ -78,9 +76,7 @@ def entropy_approximate(
 
     # Sanity checks
     if isinstance(signal, (np.ndarray, pd.DataFrame)) and signal.ndim > 1:
-        raise ValueError(
-            "Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet."
-        )
+        raise ValueError("Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet.")
 
     # Store parameters
     info = {

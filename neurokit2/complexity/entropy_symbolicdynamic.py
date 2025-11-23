@@ -82,9 +82,7 @@ def entropy_symbolicdynamic(signal, dimension=3, symbolize="MEP", c=6, **kwargs)
     """
     # Sanity checks
     if isinstance(signal, (np.ndarray, pd.DataFrame)) and signal.ndim > 1:
-        raise ValueError(
-            "Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet."
-        )
+        raise ValueError("Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet.")
 
     # Store parameters
     info = {"Dimension": dimension, "c": c, "Symbolization": symbolize}
@@ -114,9 +112,7 @@ def entropy_symbolicdynamic(signal, dimension=3, symbolize="MEP", c=6, **kwargs)
     for i in range(len(unique)):
         Ordx = np.any(embedded - unique[i, :], axis=1) == 0
         counter1[i] = sum(Ordx) / (n - ((dimension - 1) * delay))
-        Temp = embedded[
-            np.hstack((np.zeros(dimension * delay, dtype=bool), Ordx[: -(dimension * delay)])), 0
-        ]
+        Temp = embedded[np.hstack((np.zeros(dimension * delay, dtype=bool), Ordx[: -(dimension * delay)])), 0]
         counter2[i, :], _ = np.histogram(Temp, Bins)
 
     Temp = np.sum(counter2, axis=1)

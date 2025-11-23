@@ -58,15 +58,13 @@ def ppg_plot(ppg_signals, info=None, static=True):
     # Sanity-check input.
     if not isinstance(ppg_signals, pd.DataFrame):
         raise ValueError(
-            "NeuroKit error: The `ppg_signals` argument must"
-            " be the DataFrame returned by `ppg_process()`."
+            "NeuroKit error: The `ppg_signals` argument must" " be the DataFrame returned by `ppg_process()`."
         )
 
     # Extract Peaks.
     if info is None:
         warn(
-            "'info' dict not provided. Some information might be missing."
-            + " Sampling rate will be set to 1000 Hz.",
+            "'info' dict not provided. Some information might be missing." + " Sampling rate will be set to 1000 Hz.",
             category=NeuroKitWarning,
         )
         info = {"sampling_rate": 1000}
@@ -131,9 +129,7 @@ def ppg_plot(ppg_signals, info=None, static=True):
             ) from e
 
         # X-axis
-        x_axis = np.linspace(
-            0, len(ppg_signals) / info["sampling_rate"], len(ppg_signals)
-        )
+        x_axis = np.linspace(0, len(ppg_signals) / info["sampling_rate"], len(ppg_signals))
 
         fig = make_subplots(
             rows=2,
@@ -143,9 +139,7 @@ def ppg_plot(ppg_signals, info=None, static=True):
         )
 
         # Plot cleaned and raw PPG
-        fig.add_trace(
-            go.Scatter(x=x_axis, y=ppg_signals["PPG_Raw"], name="Raw"), row=1, col=1
-        )
+        fig.add_trace(go.Scatter(x=x_axis, y=ppg_signals["PPG_Raw"], name="Raw"), row=1, col=1)
         fig.add_trace(
             go.Scatter(
                 x=x_axis,

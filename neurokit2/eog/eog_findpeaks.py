@@ -113,16 +113,11 @@ def eog_findpeaks(veog_cleaned, sampling_rate=None, method="mne", **kwargs):
     elif method in ["blinker"]:
         peaks = _eog_findpeaks_blinker(eog_cleaned, sampling_rate=sampling_rate)
     elif method in ["neurokit", "nk"]:
-        peaks = _eog_findpeaks_neurokit(
-            eog_cleaned, sampling_rate=sampling_rate, **kwargs
-        )
+        peaks = _eog_findpeaks_neurokit(eog_cleaned, sampling_rate=sampling_rate, **kwargs)
     #    elif method in ["jammes2008", "jammes"]:
     #        peaks = _eog_findpeaks_jammes2008(eog_cleaned, sampling_rate=sampling_rate)
     else:
-        raise ValueError(
-            "NeuroKit error: eog_peaks(): 'method' should be "
-            "one of 'mne', 'brainstorm' or 'blinker'."
-        )
+        raise ValueError("NeuroKit error: eog_peaks(): 'method' should be " "one of 'mne', 'brainstorm' or 'blinker'.")
 
     return peaks
 
@@ -133,18 +128,14 @@ def eog_findpeaks(veog_cleaned, sampling_rate=None, method="mne", **kwargs):
 def _eog_findpeaks_neurokit(eog_cleaned, sampling_rate=1000, threshold=0.33, show=True):
     """In-house EOG blink detection."""
     peaks = signal_findpeaks(eog_cleaned, relative_height_min=1.25)["Peaks"]
-    _, peaks = signal_fixpeaks(
-        peaks=peaks, sampling_rate=sampling_rate, interval_min=0.2, method="neurokit"
-    )
+    _, peaks = signal_fixpeaks(peaks=peaks, sampling_rate=sampling_rate, interval_min=0.2, method="neurokit")
     peaks = _eog_findpeaks_neurokit_filterblinks(
         eog_cleaned, peaks, sampling_rate=sampling_rate, threshold=threshold, show=show
     )
     return peaks
 
 
-def _eog_findpeaks_neurokit_filterblinks(
-    eog_cleaned, peaks, sampling_rate=1000, threshold=0.5, show=False
-):
+def _eog_findpeaks_neurokit_filterblinks(eog_cleaned, peaks, sampling_rate=1000, threshold=0.5, show=False):
     """Compare each detected event to blink template and reject it if too different."""
     # Get epoch around each blink
     events = epochs_create(
@@ -288,9 +279,7 @@ def _eog_findpeaks_blinker(eog_cleaned, sampling_rate=1000):
 
     candidates = np.array(potential_blinks)[np.append(0, indexes)[blinks]]
 
-    _, peaks, _, _, _, _ = _eog_features_delineate(
-        eog_cleaned, candidates, sampling_rate=sampling_rate
-    )
+    _, peaks, _, _, _, _ = _eog_features_delineate(eog_cleaned, candidates, sampling_rate=sampling_rate)
 
     # Blink peak markers
     peaks = np.array(peaks)

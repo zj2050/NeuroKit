@@ -254,9 +254,7 @@ def _signal_distort_noise_multifrequency(
     rng=None,
 ):
     base_noise = np.zeros(len(signal))
-    params = listify(
-        noise_amplitude=noise_amplitude, noise_frequency=noise_frequency, noise_shape=noise_shape
-    )
+    params = listify(noise_amplitude=noise_amplitude, noise_frequency=noise_frequency, noise_shape=noise_shape)
 
     for i in range(len(params["noise_amplitude"])):
 
@@ -330,9 +328,7 @@ def _signal_distort_noise(
     elif noise_shape == "laplace":
         _noise = rng.laplace(0, noise_amplitude, noise_duration)
     else:
-        raise ValueError(
-            "NeuroKit error: signal_distort(): 'noise_shape' should be one of 'gaussian' or 'laplace'."
-        )
+        raise ValueError("NeuroKit error: signal_distort(): 'noise_shape' should be one of 'gaussian' or 'laplace'.")
 
     if len(_noise) != n_samples:
         _noise = signal_resample(_noise, desired_length=n_samples, method="interpolation")

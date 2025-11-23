@@ -77,9 +77,7 @@ def rsp_intervalrelated(data, sampling_rate=1000):
             intervals[index]["Label"] = data[index]["Label"].iloc[0]
 
             # Features
-            intervals[index] = _rsp_intervalrelated_features(
-                data[index], sampling_rate, intervals[index]
-            )
+            intervals[index] = _rsp_intervalrelated_features(data[index], sampling_rate, intervals[index])
 
         intervals = pd.DataFrame.from_dict(intervals, orient="index")
 
@@ -108,12 +106,8 @@ def _rsp_intervalrelated_features(data, sampling_rate, output={}):
         output["RSP_RVT"] = np.nanmean(data["RSP_RVT"].values)
 
     if "RSP_Symmetry_PeakTrough" in colnames:
-        output["RSP_Symmetry_PeakTrough"] = np.nanmean(
-            data["RSP_Symmetry_PeakTrough"].values
-        )
-        output["RSP_Symmetry_RiseDecay"] = np.nanmean(
-            data["RSP_Symmetry_RiseDecay"].values
-        )
+        output["RSP_Symmetry_PeakTrough"] = np.nanmean(data["RSP_Symmetry_PeakTrough"].values)
+        output["RSP_Symmetry_RiseDecay"] = np.nanmean(data["RSP_Symmetry_RiseDecay"].values)
 
     if "RSP_Phase" in colnames:
         # Extract inspiration durations
@@ -128,9 +122,7 @@ def _rsp_intervalrelated_features(data, sampling_rate, output={}):
         # Check for unequal lengths
         diff = abs(len(insp_start) - len(insp_end))
         if len(insp_start) > len(insp_end):
-            insp_start = insp_start[
-                : len(insp_start) - diff
-            ]  # remove extra start points
+            insp_start = insp_start[: len(insp_start) - diff]  # remove extra start points
         elif len(insp_end) > len(insp_start):
             insp_end = insp_end[: len(insp_end) - diff]  # remove extra end points
 
@@ -157,8 +149,7 @@ def _rsp_intervalrelated_features(data, sampling_rate, output={}):
         output["RSP_Phase_Duration_Inspiration"] = np.mean(insp_times)
         output["RSP_Phase_Duration_Expiration"] = np.mean(exp_times)
         output["RSP_Phase_Duration_Ratio"] = (
-            output["RSP_Phase_Duration_Inspiration"]
-            / output["RSP_Phase_Duration_Expiration"]
+            output["RSP_Phase_Duration_Inspiration"] / output["RSP_Phase_Duration_Expiration"]
         )
 
     return output

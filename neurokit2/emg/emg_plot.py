@@ -53,8 +53,7 @@ def emg_plot(emg_signals, info=None, static=True):
     """
     if info is None:
         warn(
-            "'info' dict not provided. Some information might be missing."
-            + " Sampling rate will be set to 1000 Hz.",
+            "'info' dict not provided. Some information might be missing." + " Sampling rate will be set to 1000 Hz.",
             category=NeuroKitWarning,
         )
 
@@ -69,21 +68,16 @@ def emg_plot(emg_signals, info=None, static=True):
     # Sanity-check input.
     if not isinstance(emg_signals, pd.DataFrame):
         raise ValueError(
-            "NeuroKit error: The `emg_signals` argument must"
-            " be the DataFrame returned by `emg_process()`."
+            "NeuroKit error: The `emg_signals` argument must" " be the DataFrame returned by `emg_process()`."
         )
 
     # Determine what to display on the x-axis, mark activity.
-    x_axis = np.linspace(
-        0, emg_signals.shape[0] / info["sampling_rate"], emg_signals.shape[0]
-    )
+    x_axis = np.linspace(0, emg_signals.shape[0] / info["sampling_rate"], emg_signals.shape[0])
 
     if static is True:
         _emg_plot_static(emg_signals, x_axis, onsets, offsets, info["sampling_rate"])
     else:
-        return _emg_plot_interactive(
-            emg_signals, x_axis, onsets, offsets, info["sampling_rate"]
-        )
+        return _emg_plot_interactive(emg_signals, x_axis, onsets, offsets, info["sampling_rate"])
 
 
 # =============================================================================

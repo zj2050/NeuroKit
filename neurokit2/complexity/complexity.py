@@ -158,9 +158,7 @@ def complexity(signal, which="makowski2022", delay=1, dimension=2, tolerance="sd
     """
     # Sanity checks
     if isinstance(signal, (np.ndarray, pd.DataFrame)) and signal.ndim > 1:
-        raise ValueError(
-            "Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet."
-        )
+        raise ValueError("Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet.")
 
     # Initialize
     df = {}
@@ -173,21 +171,11 @@ def complexity(signal, which="makowski2022", delay=1, dimension=2, tolerance="sd
         df["Hjorth"], info["Hjorth"] = complexity_hjorth(signal)
         df["AttEn"], info["AttEn"] = entropy_attention(signal)
         df["SVDEn"], info["SVDEn"] = entropy_svd(signal, delay=delay, dimension=dimension)
-        df["BubbEn"], info["BubbEn"] = entropy_bubble(
-            signal, delay=delay, dimension=dimension, **kwargs
-        )
+        df["BubbEn"], info["BubbEn"] = entropy_bubble(signal, delay=delay, dimension=dimension, **kwargs)
         df["CWPEn"], info["CWPEn"] = entropy_permutation(
-            signal,
-            delay=delay,
-            dimension=dimension,
-            corrected=True,
-            weighted=True,
-            conditional=True,
-            **kwargs
+            signal, delay=delay, dimension=dimension, corrected=True, weighted=True, conditional=True, **kwargs
         )
-        df["MSPEn"], info["MSPEn"] = entropy_multiscale(
-            signal, dimension=dimension, method="MSPEn", **kwargs
-        )
+        df["MSPEn"], info["MSPEn"] = entropy_multiscale(signal, dimension=dimension, method="MSPEn", **kwargs)
 
         mfdfa, _ = fractal_dfa(signal, multifractal=True, **kwargs)
         for k in mfdfa.columns:

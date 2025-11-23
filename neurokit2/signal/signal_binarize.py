@@ -68,9 +68,7 @@ def _signal_binarize(signal, method="threshold", threshold="auto"):
     elif method == "mixture":
         binary = _signal_binarize_mixture(signal, threshold=threshold)
     else:
-        raise ValueError(
-            "NeuroKit error: signal_binarize(): 'method' should be one of 'threshold' or 'mixture'."
-        )
+        raise ValueError("NeuroKit error: signal_binarize(): 'method' should be one of 'threshold' or 'mixture'.")
     return binary
 
 
@@ -101,9 +99,7 @@ def _signal_binarize_mixture(signal, threshold="auto"):
     clf = clf.fit(signal.reshape(-1, 1))
 
     # Get predicted probabilities
-    probability = clf.predict_proba(signal.reshape(-1, 1))[
-        :, np.argmax(clf.means_[:, 0])
-    ]
+    probability = clf.predict_proba(signal.reshape(-1, 1))[:, np.argmax(clf.means_[:, 0])]
 
     binary = np.zeros(len(signal))
     binary[probability >= threshold] = 1

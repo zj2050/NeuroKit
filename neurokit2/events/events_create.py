@@ -51,8 +51,6 @@ def events_create(event_onsets, event_durations=None, event_labels=None, event_c
 
     events = {"onset": event_onsets, "duration": event_durations}
 
-    events = _events_find_label(
-        events, event_labels=event_labels, event_conditions=event_conditions
-    )
+    events = _events_find_label(events, event_labels=event_labels, event_conditions=event_conditions)
 
     return events

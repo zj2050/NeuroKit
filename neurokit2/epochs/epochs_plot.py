@@ -104,28 +104,14 @@ def _epochs_mne_sanitize(epochs, what):
     """
 
     data = epochs.to_data_frame()
-    data = data.rename(
-        columns={"time": "Time", "condition": "Condition", "epoch": "Label"}
-    )
+    data = data.rename(columns={"time": "Time", "condition": "Condition", "epoch": "Label"})
     data["Time"] = data["Time"] / 1000  # ms to seconds
 
     if isinstance(what, str):
-        data = data[
-            [
-                x
-                for x in data.columns.values
-                if x in ["Time", "Condition", "Label", what]
-            ]
-        ]
+        data = data[[x for x in data.columns.values if x in ["Time", "Condition", "Label", what]]]
     # Select a few specified channels
     elif isinstance(what, list):
-        data = data[
-            [
-                x
-                for x in data.columns.values
-                if x in ["Time", "Condition", "Label"] + what
-            ]
-        ]
+        data = data[[x for x in data.columns.values if x in ["Time", "Condition", "Label"] + what]]
 
     return data
 
@@ -152,13 +138,9 @@ def _epochs_plot(data, ax, col, legend):
 
         # Plot
         for key, group in grouped:
-            df = group.pivot_table(
-                index="Time", columns=["Condition", "Label"], values=col
-            )
+            df = group.pivot_table(index="Time", columns=["Condition", "Label"], values=col)
             df.plot(ax=ax, label=col, title=col, style=colors[key], legend=legend)
 
         # TODO: Custom legend
     else:
-        data.pivot(index="Time", columns="Label", values=col).plot(
-            ax=ax, label=col, title=col, legend=legend
-        )
+        data.pivot(index="Time", columns="Label", values=col).plot(ax=ax, label=col, title=col, legend=legend)

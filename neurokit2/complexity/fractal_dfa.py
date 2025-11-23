@@ -204,9 +204,7 @@ def fractal_dfa(
     """
     # Sanity checks
     if isinstance(signal, (np.ndarray, pd.DataFrame)) and signal.ndim > 1:
-        raise ValueError(
-            "Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet."
-        )
+        raise ValueError("Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet.")
 
     n = len(signal)
     scale = _fractal_dfa_findscales(n, scale)
@@ -246,9 +244,7 @@ def fractal_dfa(
         # Find knees of fluctuations
         knee = np.repeat(len(scale), fluctuations.shape[1])
         for i in range(fluctuations.shape[1]):
-            knee[i] = find_knee(
-                y=np.log2(fluctuations[:, i]), x=np.log2(scale), show=False, verbose=False
-            )
+            knee[i] = find_knee(y=np.log2(fluctuations[:, i]), x=np.log2(scale), show=False, verbose=False)
         knee = np.exp2(np.nanmax(knee))
         # Cut fluctuations
         fluctuations = fluctuations[scale <= knee, :]
@@ -325,9 +321,7 @@ def _fractal_dfa_findscales(n, scale="default"):
         raise ValueError("NeuroKit error: more than one window is needed. Increase 'scale'.")
 
     if np.min(scale) < 2:
-        raise ValueError(
-            "NeuroKit error: there must be at least 2 data points in each window. Decrease 'scale'."
-        )
+        raise ValueError("NeuroKit error: there must be at least 2 data points in each window. Decrease 'scale'.")
     if np.max(scale) >= n:
         raise ValueError(
             "NeuroKit error: the window cannot contain more data points than the time series. Decrease 'scale'."
@@ -504,9 +498,7 @@ def _singularity_spectrum(q, slopes):
     # hFI tends to zero in high fractionation signals.
     if len(slopes) > 3:
         # Help needed to double check that!
-        out["Fluctuation"] = np.sum(np.gradient(np.gradient(out["h"])) ** 2) / (
-            2 * np.max(np.abs(q)) + 2
-        )
+        out["Fluctuation"] = np.sum(np.gradient(np.gradient(out["h"])) ** 2) / (2 * np.max(np.abs(q)) + 2)
     else:
         out["Fluctuation"] = np.nan
     # hFI tends to zero in high fractionation signals. hFI has no reference point when a set of

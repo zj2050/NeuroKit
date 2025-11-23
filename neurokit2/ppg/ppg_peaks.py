@@ -7,14 +7,7 @@ from ..stats import rescale
 from .ppg_findpeaks import ppg_findpeaks
 
 
-def ppg_peaks(
-    ppg_cleaned,
-    sampling_rate=1000,
-    method="elgendi",
-    correct_artifacts=False,
-    show=False,
-    **kwargs
-):
+def ppg_peaks(ppg_cleaned, sampling_rate=1000, method="elgendi", correct_artifacts=False, show=False, **kwargs):
     """**Find systolic peaks in a photoplethysmogram (PPG) signal**
 
     Find the peaks in an PPG signal using the specified method. You can pass an unfiltered PPG
@@ -102,19 +95,13 @@ def ppg_peaks(
     # Store info
     info = {"method_peaks": method.lower(), "method_fixpeaks": "None"}
 
-    info.update(
-        ppg_findpeaks(
-            ppg_cleaned,
-            sampling_rate=sampling_rate,
-            method=method,
-            show=False,
-            **kwargs
-        )
-    )
+    info.update(ppg_findpeaks(ppg_cleaned, sampling_rate=sampling_rate, method=method, show=False, **kwargs))
 
     # Peak (and onset) correction
     # - tidy up peaks and onsets
-    if info['method_fixpeaks'].lower() == "charlton2022":  # this is the default settings when using MSPTDfastv1 or MSPTDfastv2
+    if (
+        info["method_fixpeaks"].lower() == "charlton2022"
+    ):  # this is the default settings when using MSPTDfastv1 or MSPTDfastv2
         info["PPG_Peaks_Unfixed"] = info["PPG_Peaks"].copy()
         info["PPG_Onsets_Unfixed"] = info["PPG_Onsets"].copy()
 
@@ -126,19 +113,16 @@ def ppg_peaks(
         fixpeaks = {"PPG_fixpeaks_" + str(key): val for key, val in fixpeaks.items()}
         info.update(fixpeaks)
 
-
     # - perform peak correction
     if correct_artifacts:
         info["PPG_Peaks_Uncorrected"] = info["PPG_Peaks"].copy()
 
-        fixpeaks, info["PPG_Peaks"] = signal_fixpeaks(
-            info["PPG_Peaks"], sampling_rate=sampling_rate, method="Kubios"
-        )
+        fixpeaks, info["PPG_Peaks"] = signal_fixpeaks(info["PPG_Peaks"], sampling_rate=sampling_rate, method="Kubios")
 
         # Add prefix and merge
         fixpeaks = {"PPG_fixpeaks_" + str(key): val for key, val in fixpeaks.items()}
         info.update(fixpeaks)
-    
+
     # Format output
     signals = signal_formatpeaks(
         dict(PPG_Peaks=info["PPG_Peaks"]),

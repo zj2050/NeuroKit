@@ -123,9 +123,7 @@ def complexity_lyapunov(
     """
     # Sanity checks
     if isinstance(signal, (np.ndarray, pd.DataFrame)) and signal.ndim > 1:
-        raise ValueError(
-            "Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet."
-        )
+        raise ValueError("Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet.")
 
     # Compute Minimum temporal separation between two neighbors
     # -----------------------------------------------------------
@@ -141,9 +139,7 @@ def complexity_lyapunov(
     # spectrum, to yield equivalent results."
     if separation == "auto":
         # Actual sampling rate does not matter
-        psd = signal_psd(
-            signal, sampling_rate=1000, method="fft", normalize=False, show=False
-        )
+        psd = signal_psd(signal, sampling_rate=1000, method="fft", normalize=False, show=False)
         mean_freq = np.sum(psd["Power"] * psd["Frequency"]) / np.sum(psd["Power"])
 
         # 1 / mean_freq = seconds per cycle
@@ -156,13 +152,9 @@ def complexity_lyapunov(
     # Method
     method = method.lower()
     if method in ["rosenstein", "rosenstein1993"]:
-        le, parameters = _complexity_lyapunov_rosenstein(
-            signal, delay, dimension, separation, **kwargs
-        )
+        le, parameters = _complexity_lyapunov_rosenstein(signal, delay, dimension, separation, **kwargs)
     elif method in ["makowski"]:
-        le, parameters = _complexity_lyapunov_makowski(
-            signal, delay, dimension, separation, **kwargs
-        )
+        le, parameters = _complexity_lyapunov_makowski(signal, delay, dimension, separation, **kwargs)
     elif method in ["eckmann", "eckmann1986", "eckmann1986"]:
         le, parameters = _complexity_lyapunov_eckmann(
             signal,
@@ -256,9 +248,7 @@ def _complexity_lyapunov_makowski(
     if show is True:
         plt.plot(np.arange(1, len(trajectories) + 1), trajectories)
         plt.axvline(knee, color="red", label="Changepoint", linestyle="--")
-        plt.axline(
-            (0, intercept), slope=slope, color="orange", label="Least-squares Fit"
-        )
+        plt.axline((0, intercept), slope=slope, color="orange", label="Least-squares Fit")
         plt.ylim(bottom=np.min(trajectories))
         plt.ylabel("Divergence Rate")
         plt.title(f"Largest Lyapunov Exponent (slope of the line) = {slope:.3f}")
@@ -298,9 +288,7 @@ def _complexity_lyapunov_rosenstein(
 
     # Find indices of nearest neighbours
     ntraj = m - len_trajectory + 1
-    min_dist_indices = np.argmin(
-        dists[:ntraj, :ntraj], axis=1
-    )  # exclude last few indices
+    min_dist_indices = np.argmin(dists[:ntraj, :ntraj], axis=1)  # exclude last few indices
     min_dist_indices = min_dist_indices.astype(int)
 
     # Follow trajectories of neighbour pairs for len_trajectory data points
@@ -317,9 +305,7 @@ def _complexity_lyapunov_rosenstein(
     divergence_rate = trajectories[np.isfinite(trajectories)]
 
     # LLE obtained by least-squares fit to average line
-    slope, intercept = np.polyfit(
-        np.arange(1, len(divergence_rate) + 1), divergence_rate, 1
-    )
+    slope, intercept = np.polyfit(np.arange(1, len(divergence_rate) + 1), divergence_rate, 1)
 
     # Store info
     parameters = {
@@ -329,9 +315,7 @@ def _complexity_lyapunov_rosenstein(
 
     if show is True:
         plt.plot(np.arange(1, len(divergence_rate) + 1), divergence_rate)
-        plt.axline(
-            (0, intercept), slope=slope, color="orange", label="Least-squares Fit"
-        )
+        plt.axline((0, intercept), slope=slope, color="orange", label="Least-squares Fit")
         plt.ylabel("Divergence Rate")
         plt.title(f"Largest Lyapunov Exponent (slope of the line) = {slope:.3f}")
         plt.legend()
@@ -339,9 +323,7 @@ def _complexity_lyapunov_rosenstein(
     return slope, parameters
 
 
-def _complexity_lyapunov_eckmann(
-    signal, dimension=2, separation=None, matrix_dim=4, min_neighbors="default", tau=1
-):
+def _complexity_lyapunov_eckmann(signal, dimension=2, separation=None, matrix_dim=4, min_neighbors="default", tau=1):
     """TODO: check implementation
 
     From https://github.com/CSchoel/nolds
@@ -388,9 +370,7 @@ def _complexity_lyapunov_eckmann(
 
         # get neighbors within the radius
         r = distances[i][neighbour_furthest]
-        neighbors = np.where(distances[i] <= r)[
-            0
-        ]  # should have length = min_neighbours
+        neighbors = np.where(distances[i] <= r)[0]  # should have length = min_neighbours
 
         # Find matrix T_i (matrix_dim * matrix_dim) that sends points from neighbourhood of x(i) to x(i+1)
         vec_beta = signal[neighbors + matrix_dim * m] - signal[i + matrix_dim * m]
@@ -400,9 +380,7 @@ def _complexity_lyapunov_eckmann(
         # form matrix T_i
         t_i = np.zeros((matrix_dim, matrix_dim))
         t_i[:-1, 1:] = np.identity(matrix_dim - 1)
-        t_i[-1] = np.linalg.lstsq(matrix, vec_beta, rcond=-1)[
-            0
-        ]  # least squares solution
+        t_i[-1] = np.linalg.lstsq(matrix, vec_beta, rcond=-1)[0]  # least squares solution
 
         # QR-decomposition of T * old_Q
         mat_Q, mat_R = np.linalg.qr(np.dot(t_i, old_Q))

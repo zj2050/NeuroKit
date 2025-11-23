@@ -78,26 +78,18 @@ def ppg_process(
 
     # Clean signal
     ppg_cleaned = ppg_clean(
-        ppg_signal,
-        sampling_rate=sampling_rate,
-        method=methods["method_cleaning"],
-        **methods["kwargs_cleaning"]
+        ppg_signal, sampling_rate=sampling_rate, method=methods["method_cleaning"], **methods["kwargs_cleaning"]
     )
 
     # Find peaks
     peaks_signal, info = ppg_peaks(
-        ppg_cleaned,
-        sampling_rate=sampling_rate,
-        method=methods["method_peaks"],
-        **methods["kwargs_peaks"]
+        ppg_cleaned, sampling_rate=sampling_rate, method=methods["method_peaks"], **methods["kwargs_peaks"]
     )
 
     info["sampling_rate"] = sampling_rate  # Add sampling rate in dict info
 
     # Rate computation
-    rate = signal_rate(
-        info["PPG_Peaks"], sampling_rate=sampling_rate, desired_length=len(ppg_cleaned)
-    )
+    rate = signal_rate(info["PPG_Peaks"], sampling_rate=sampling_rate, desired_length=len(ppg_cleaned))
 
     # Assess signal quality
     quality = ppg_quality(

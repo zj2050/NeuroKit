@@ -80,18 +80,14 @@ def entropy_spectral(signal, bins=None, show=False, **kwargs):
     """
     # Sanity checks
     if isinstance(signal, (np.ndarray, pd.DataFrame)) and signal.ndim > 1:
-        raise ValueError(
-            "Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet."
-        )
+        raise ValueError("Multidimensional inputs (e.g., matrices or multichannel data) are not supported yet.")
 
     # Power-spectrum density (PSD) (actual sampling rate does not matter)
     psd = signal_psd(signal, sampling_rate=1000, **kwargs)
 
     # Cut into bins
     if isinstance(bins, int):
-        psd = psd.groupby(pd.cut(psd["Frequency"], bins=bins), observed=False).agg(
-            "sum"
-        )
+        psd = psd.groupby(pd.cut(psd["Frequency"], bins=bins), observed=False).agg("sum")
         idx = psd.index.values.astype(str)
     else:
         idx = psd["Frequency"].values
