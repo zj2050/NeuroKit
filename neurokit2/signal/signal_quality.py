@@ -338,8 +338,11 @@ def _quality_ici(signal, signal_type, primary_detector, secondary_detector, samp
         match_start = any(abs(start - s) <= tolerance_samps for s in cycles_secondary)
         match_end = any(abs(end - s) <= tolerance_samps for s in cycles_secondary)
 
-        # if they have both detected cycles within the tolerance,
-        if match_start and match_end:
+        # check whether the secondary detector has detected any additional cycles within the ICI
+        cycle_within_IBI = any((start+tolerance_samps) < s < (end-tolerance_samps) for s in cycles_secondary)
+
+        # if they have both detected cycles within the tolerance, and there are not additional cycles within the ICI
+        if match_start and match_end and not cycle_within_IBI:
             # then assign quality = 1 (high quality) to the period within the ICI
             quality[start:end] = 1
             # and if this is the first or last ICI, then extend the quality assignment to the start or end of the signal
