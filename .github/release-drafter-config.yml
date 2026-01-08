@@ -1,26 +1,42 @@
 name-template: '$RESOLVED_VERSION'
 tag-template: 'v$RESOLVED_VERSION'
 
+# This automatically suggests the next version based on PR labels
 version-resolver:
   major:
-    labels:
-      - 'major'
+    labels: ['major', 'breaking']
   minor:
-    labels:
-      - 'minor'
+    labels: ['minor', 'feature', 'enhancement']
   patch:
-    labels:
-      - 'patch'
+    labels: ['patch', 'bug', 'fix']
   default: patch
+
+# This automatically labels PRs based on their title (saves you time!)
+autolabeler:
+  - label: 'bug'
+    title: ['/(bug|fix|fixed|fixes)/i']
+  - label: 'feature'
+    title: ['/(feature|new|add)/i']
+  - label: 'docs'
+    title: ['/(docs|documentation|readme)/i']
+
+categories:
+  - title: '🚀 Features & Enhancements'
+    labels: ['feature', 'enhancement']
+  - title: '🐛 Bug Fixes'
+    labels: ['bug', 'fix']
+  - title: '📖 Documentation'
+    labels: ['docs', 'documentation']
+  - title: '🛠 Maintenance & CI'
+    labels: ['chore', 'ci', 'dependencies']
 
 template: |
   ## 🚀 What’s New
-  
-  See the [NEWS](https://github.com/neuropsychology/NeuroKit/blob/master/NEWS.rst) file for the changelog.
+
+  For a detailed record of changes, see the [NEWS](https://github.com/neuropsychology/NeuroKit/blob/master/NEWS.rst) file.
 
   $CHANGES
-  
-  ## 👏 Thanks to 
-  
+
+  ## 👏 Thanks to the contributors
+
   $CONTRIBUTORS
-  

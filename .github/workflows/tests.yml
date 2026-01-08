@@ -1,42 +1,89 @@
-name: 🏭Tests
+# name: 🏭Tests
+#
+# # on: [push, pull_request]
+# on:
+#     # Trigger the workflow on push to master branch or pull request
+#     push:
+#         branches:
+#             - master
+#     pull_request:
+#
+# jobs:
+#     build:
+#         runs-on: ${{ matrix.platform }}
+#         strategy:
+#             max-parallel: 4
+#             matrix:
+#                 # https://help.github.com/articles/virtual-environments-for-github-actions
+#                 platform:
+#                     - ubuntu-latest # ubuntu-18.04
+#                 #  - macos-latest  # macOS-10.14
+#                 #  - windows-latest  # windows-2019
+#                 python-version: ["3.10", "3.11", "3.12", "3.13"]
+#
+#         steps:
+#             - uses: actions/checkout@v4
+#
+#             - name: Set up Python ${{ matrix.python-version }}
+#               uses: actions/setup-python@v5
+#               with:
+#                   python-version: ${{ matrix.python-version }}
+#
+#             - name: Install dependencies
+#               run: |
+#                   python -m pip install --upgrade setuptools pip wheel
+#                   python -m pip install tox
+#
+#             - name: Test with tox
+#               run: |
+#                   cd $GITHUB_WORKSPACE && python -m tox -e py
+#
+#             - name: Upload coverage to Codecov
+#               uses: codecov/codecov-action@v3
+#
+#
 
-# on: [push, pull_request]
+name: 🏭 Tests
+
 on:
-    # Trigger the workflow on push to master branch or pull request
-    push:
-        branches:
-            - master
-    pull_request:
+  push:
+    branches:
+      - master
+  pull_request:
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
-    build:
-        runs-on: ${{ matrix.platform }}
-        strategy:
-            max-parallel: 4
-            matrix:
-                # https://help.github.com/articles/virtual-environments-for-github-actions
-                platform:
-                    - ubuntu-latest # ubuntu-18.04
-                #  - macos-latest  # macOS-10.14
-                #  - windows-latest  # windows-2019
-                python-version: ["3.10", "3.11", "3.12", "3.13"]
+  test:
+    name: Python ${{ matrix.python-version }} on ${{ matrix.platform }}
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ubuntu-latest]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
 
-        steps:
-            - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-            - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v5
-              with:
-                  python-version: ${{ matrix.python-version }}
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          python-version: ${{ matrix.python-version }}
 
-            - name: Install dependencies
-              run: |
-                  python -m pip install --upgrade setuptools pip wheel
-                  python -m pip install tox
+      - name: Install dependencies
+        run: |
+          uv sync --extra full --group dev
 
-            - name: Test with tox
-              run: |
-                  cd $GITHUB_WORKSPACE && python -m tox -e py
+      - name: Run Tests
+        run: |
+          uv run pytest --cov=neurokit2 --cov-report=xml
 
-            - name: Upload coverage to Codecov
-              uses: codecov/codecov-action@v3
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          use_oidc: true
+          fail_ci_if_error: false

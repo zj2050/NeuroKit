@@ -89,6 +89,7 @@ def summarize_table(signals):
         )
 
         try:
+            # Requires tabulate
             md = summary_table.to_markdown(index=None)
         except ImportError:
             md = summary_table  # in case printing markdown export fails

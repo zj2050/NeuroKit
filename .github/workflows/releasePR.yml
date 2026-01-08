@@ -1,80 +1,80 @@
-name: 📦 Release PR
-# https://packaging.python.org/guides/publishing-package-distribution-releases-using-github-actions-ci-cd-workflows/
+name: 📦 Release & Publish
+
 on:
-    push:
-        branches:
-            - master
+  push:
+    branches: [master]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
 
 jobs:
-    readme:
-        name: Run README and save figures
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v3
+  # --- STAGE 1: Update Visuals ---
+  readme:
+    name: 📊 Update README Figures
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v4
 
-            - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v4
-              with:
-                  python-version: "3.11"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
 
-            - name: Install dependencies
-              run: |
-                  python -m pip install --upgrade pip
-                  pip install https://github.com/DominiqueMakowski/popularipy/zipball/master
-                  cd $GITHUB_WORKSPACE && pip install .[test]
+      - name: Install dependencies
+        run: |
+          uv pip install "popularipy @ git+https://github.com/DominiqueMakowski/popularipy"
+          uv sync --extra full --group dev
 
-            - name: Run README_examples.py
-              run: |
-                  cd $GITHUB_WORKSPACE/docs/readme
-                  python README_examples.py
+      - name: Run README_examples
+        run: uv run python docs/readme/README_examples.py
 
-            - name: Commit figures
-              uses: EndBug/add-and-commit@v4
-              with:
-                  message: "Update README figures"
-                  ref: "master"
-                  add: "*.png"
+      - name: Commit figures
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update README figures [skip ci]"
+          file_pattern: "*.png"
 
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # --- STAGE 2: Test Release ---
+  publish-test:
+    name: 🧪 Publish to TestPyPI
+    needs: readme
+    if: always() && startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
 
-    build-n-publish:
-        name: Build and publish Python 🐍 distributions 📦 to PyPI and TestPyPI
-        needs: readme
-        if: always()
-        runs-on: ubuntu-latest
+      - name: Build
+        run: uv build
 
-        steps:
-            - uses: actions/checkout@v3
+      - name: Publish to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          verbose: true
 
-            - name: Set up Python
-              uses: actions/setup-python@v4
-              with:
-                  python-version: "3.11"
+  # --- STAGE 3: Production Release ---
+  publish-prod:
+    name: 🚀 Publish to PyPI
+    needs: publish-test
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/neurokit2
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
 
-            - name: Install pep517
-              run: >-
-                  python -m
-                  pip install
-                  pep517
-                  --user
+      - name: Build
+        run: uv build
 
-            - name: Install dependencies
-              run: |
-                  python -m pip install --upgrade pip
-                  pip install setuptools wheel twine
-
-            - name: Build package
-              run: python setup.py sdist bdist_wheel
-
-            - name: Publish distribution 📦 to Test PyPI
-              uses: pypa/gh-action-pypi-publish@release/v1
-              with:
-                  password: ${{ secrets.TEST_PYPI_PASSWORD }}
-                  repository_url: https://test.pypi.org/legacy/
-
-            - name: Publish distribution 📦 to PyPI
-              #if: startsWith(github.event.ref, 'refs/tags')
-              uses: pypa/gh-action-pypi-publish@release/v1
-              with:
-                  password: ${{ secrets.PYPI_PASSWORD }}
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          verbose: true
