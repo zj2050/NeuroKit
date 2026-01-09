@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import shlex
 import shutil
 import subprocess
 import sys
@@ -29,7 +30,7 @@ def confirm_and_run(cmd: str, use_runner: bool = True, skip_confirm: bool = Fals
             return
 
     try:
-        subprocess.run(full_cmd, shell=True, check=True)
+        subprocess.run(shlex.split(full_cmd), check=True)
     except subprocess.CalledProcessError as e:
         print(f"Failed with exit code {e.returncode}")
         sys.exit(e.returncode)

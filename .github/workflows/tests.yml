@@ -23,6 +23,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install CVXOPT build dependencies for newer Python versions
+        if: matrix.python-version == '3.14'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            python3-dev \
+            libopenblas-dev \
+            liblapack-dev \
+            libsuitesparse-dev \
+            libglpk-dev
+
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
