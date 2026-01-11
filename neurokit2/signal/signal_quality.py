@@ -6,8 +6,14 @@ from ..signal import signal_interpolate, signal_cyclesegment
 
 
 def signal_quality(
-    signal, sampling_rate=1000, cycle_inds=None, signal_type=None, method="templatematch", primary_detector=None,
-    secondary_detector=None, tolerance_window_ms=50
+    signal,
+    sampling_rate=1000,
+    cycle_inds=None,
+    signal_type=None,
+    method="templatematch",
+    primary_detector=None,
+    secondary_detector=None,
+    tolerance_window_ms=50,
 ):
     """**Assess quality of signal by comparing individual cycle morphologies with a template**
 
@@ -35,7 +41,8 @@ def signal_quality(
       only if a secondary detector detects cycles in the same positions (within a tolerance). In this implementation,
       all signal samples within an ICI are rated as high quality (1) if that ICI is predicted to be accurate, or low
       quality (0) if that ICI is predicted to be inaccurate. This approach was derived from the previously
-      proposed bSQI approach.
+      proposed bSQI approach. The resulting quality signal is 1-padded, with all samples before the first cycle
+      and after the last cycle set to 1.
 
 
     Parameters
@@ -132,34 +139,52 @@ def signal_quality(
 
     # Check inputs
     if signal_type is None:
-        raise ValueError("`signal_type` must be specified (e.g. 'ppg', 'ecg', or 'rsp').")
+        raise ValueError(
+            "`signal_type` must be specified (e.g. 'ppg', 'ecg', or 'rsp')."
+        )
     if method == "ici" and (signal_type != "ppg" and signal_type != "ecg"):
-        raise ValueError("`method` 'ici' is only supported for 'ppg' and 'ecg' signal types.")
+        raise ValueError(
+            "`method` 'ici' is only supported for 'ppg' and 'ecg' signal types."
+        )
     if method != "ici" and (cycle_inds is None or len(cycle_inds) == 0):
-        raise ValueError("`templatematch` and `dissimilarity` require at least one detected peak.")
+        raise ValueError(
+            "`templatematch` and `dissimilarity` require at least one detected peak."
+        )
 
     # Standardize inputs
     signal_type = signal_type.lower()  # remove capitalised letters
     method = method.lower()  # remove capitalised letters
 
     # Run selected quality assessment method
-    if method in ["templatematch"]:  # Based on the approach in Orphanidou et al. (2015) and Charlton et al. (2021)
+    if method in [
+        "templatematch"
+    ]:  # Based on the approach in Orphanidou et al. (2015) and Charlton et al. (2021)
         quality = _quality_templatematch(
-            signal, cycle_inds=cycle_inds, signal_type=signal_type, sampling_rate=sampling_rate,
+            signal,
+            cycle_inds=cycle_inds,
+            signal_type=signal_type,
+            sampling_rate=sampling_rate,
         )
     elif method in ["dissimilarity"]:  # Based on the approach in Sabeti et al. (2019)
         quality = _quality_dissimilarity(
-            signal, cycle_inds=cycle_inds, signal_type=signal_type, sampling_rate=sampling_rate
+            signal,
+            cycle_inds=cycle_inds,
+            signal_type=signal_type,
+            sampling_rate=sampling_rate,
         )
     elif method in ["ici", "ho2025"]:  # Based on the approach in Ho et al. (2025)
         quality = _quality_ici(
-            signal, signal_type=signal_type, primary_detector=primary_detector, secondary_detector=secondary_detector,
-            sampling_rate=sampling_rate,tolerance_window_ms=tolerance_window_ms
+            signal,
+            signal_type=signal_type,
+            primary_detector=primary_detector,
+            secondary_detector=secondary_detector,
+            sampling_rate=sampling_rate,
+            tolerance_window_ms=tolerance_window_ms,
         )
     else:
         raise ValueError(
-            f'The `{method}` method does not exist in signal_quality. '
-            'Please choose one of: `templatematch`, `dissimilarity` or `ici`'
+            f"The `{method}` method does not exist in signal_quality. "
+            "Please choose one of: `templatematch`, `dissimilarity` or `ici`"
         )
 
     return quality
@@ -169,9 +194,10 @@ def signal_quality(
 # Calculate template morphology
 # =============================================================================
 def _calc_template_morph(signal, cycle_inds, signal_type, sampling_rate=1000):
-
     # Segment to get individual cycle morphologies
-    cycles, average_cycle_rate = signal_cyclesegment(signal, cycle_inds, sampling_rate=sampling_rate)
+    cycles, average_cycle_rate = signal_cyclesegment(
+        signal, cycle_inds, sampling_rate=sampling_rate
+    )
 
     # convert these to dataframe
     ind_morph = epochs_to_df(cycles).pivot(
@@ -197,7 +223,6 @@ def _calc_template_morph(signal, cycle_inds, signal_type, sampling_rate=1000):
 def _quality_templatematch(
     signal, cycle_inds=None, signal_type="ppg", sampling_rate=1000
 ):
-
     # Obtain individual cycle morphologies and template cycle morphology
     templ_morph, ind_morph, cycle_inds = _calc_template_morph(
         signal,
@@ -224,7 +249,6 @@ def _quality_templatematch(
 # Disimilarity measure method
 # =============================================================================
 def _norm_sum_one(pw):
-
     # ensure all values are positive
     pw = pw - pw.min() + 1
 
@@ -260,7 +284,6 @@ def _calc_dis(pw1, pw2):
 def _quality_dissimilarity(
     signal, cycle_inds=None, signal_type="ppg", sampling_rate=1000
 ):
-
     # Obtain individual cycle morphologies and template cycle morphology
     templ_morph, ind_morph, cycle_inds = _calc_template_morph(
         signal,
@@ -286,9 +309,13 @@ def _quality_dissimilarity(
 # Quality assessment using ICI method
 # =============================================================================
 def _quality_ici(
-            signal, signal_type, primary_detector, secondary_detector, sampling_rate, tolerance_window_ms=50
-        ):
-
+    signal,
+    signal_type,
+    primary_detector,
+    secondary_detector,
+    sampling_rate,
+    tolerance_window_ms=50,
+):
     # Specify default cycle (e.g. beat) detectors
     if primary_detector is None:
         if signal_type == "ecg":
@@ -296,14 +323,18 @@ def _quality_ici(
         elif signal_type == "ppg":
             primary_detector = "charlton"
         else:
-            raise Exception("default ICI quality assessment detectors only available for ECG and PPG signals.")
+            raise Exception(
+                "default ICI quality assessment detectors only available for ECG and PPG signals."
+            )
     if secondary_detector is None:
         if signal_type == "ecg":
             secondary_detector = "neurokit"
         elif signal_type == "ppg":
             secondary_detector = "elgendi"
         else:
-            raise Exception("default ICI quality assessment detectors only available for ECG and PPG signals.")
+            raise Exception(
+                "default ICI quality assessment detectors only available for ECG and PPG signals."
+            )
 
     # Sanitize inputs
     signal_type = signal_type.lower()  # remove capitalised letters
@@ -316,10 +347,16 @@ def _quality_ici(
 
     # Detect cycles using each cycle detector in turn
     cycles_primary = _signal_cycles(
-        signal, signal_type=signal_type, cycle_detector=primary_detector, sampling_rate=sampling_rate
+        signal,
+        signal_type=signal_type,
+        cycle_detector=primary_detector,
+        sampling_rate=sampling_rate,
     )
     cycles_secondary = _signal_cycles(
-        signal, signal_type=signal_type, cycle_detector=secondary_detector, sampling_rate=sampling_rate
+        signal,
+        signal_type=signal_type,
+        cycle_detector=secondary_detector,
+        sampling_rate=sampling_rate,
     )
 
     # Filter closely spaced cycles to keep only the highest amplitude cycle
@@ -338,7 +375,10 @@ def _quality_ici(
         match_end = any(abs(end - s) <= tolerance_samps for s in cycles_secondary)
 
         # check whether the secondary detector has detected any additional cycles within the ICI
-        cycle_within_IBI = any((start+tolerance_samps) < s < (end-tolerance_samps) for s in cycles_secondary)
+        cycle_within_IBI = any(
+            (start + tolerance_samps) < s < (end - tolerance_samps)
+            for s in cycles_secondary
+        )
 
         # if they have both detected cycles within the tolerance, and there are not additional cycles within the ICI
         if match_start and match_end and not cycle_within_IBI:
@@ -354,7 +394,6 @@ def _quality_ici(
 
 
 def _filter_close_cycles(cycles, signal, tolerance_samps):
-
     if len(cycles) == 0:
         return []
 
@@ -371,13 +410,11 @@ def _filter_close_cycles(cycles, signal, tolerance_samps):
 
 
 def _signal_cycles(signal, signal_type, cycle_detector, sampling_rate):
-
     # Import peak-detection functions (placed here to avoid circular imports)
     from ..ppg import ppg_peaks
     from ..ecg import ecg_peaks
 
-    if signal_type=="ecg":
-
+    if signal_type == "ecg":
         # Detect beats in ECG signal
         signals, info = ecg_peaks(
             signal,
@@ -388,8 +425,7 @@ def _signal_cycles(signal, signal_type, cycle_detector, sampling_rate):
         # Extract cycles
         cycles = info["ECG_R_Peaks"]
 
-    elif signal_type=="ppg":
-
+    elif signal_type == "ppg":
         # Detect beats in PPG signal
         signals, info = ppg_peaks(
             signal,
