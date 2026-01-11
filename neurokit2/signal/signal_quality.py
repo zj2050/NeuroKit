@@ -157,7 +157,10 @@ def signal_quality(
             sampling_rate=sampling_rate,tolerance_window_ms=tolerance_window_ms
         )
     else:
-        raise ValueError(f'The `{method}` method does not exist in signal_quality. Please choose one of: `templatematch`, `dissimilarity` or `ici`')
+        raise ValueError(
+            f'The `{method}` method does not exist in signal_quality. '
+            'Please choose one of: `templatematch`, `dissimilarity` or `ici`'
+        )
 
     return quality
 
