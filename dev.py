@@ -36,9 +36,7 @@ def confirm_and_run(cmd: str, use_runner: bool = True, skip_confirm: bool = Fals
         sys.exit(e.returncode)
 
 
-# --- Task Logic ---
-
-
+# Subcommands
 def setup(skip):
     if "uv run" in RUNNER:
         confirm_and_run("uv sync --all-groups --all-extras", use_runner=False, skip_confirm=skip)
@@ -60,7 +58,7 @@ def docs_clean(skip):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Universal Project Task Runner",
+        description="NeuroKit Development CLI",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="Example: ./dev.py test",
     )
@@ -91,9 +89,9 @@ def main():
     elif args.task == "test":
         confirm_and_run("pytest", skip_confirm=args.yes)
     elif args.task == "lint":
-        confirm_and_run("ruff check --fix", skip_confirm=args.yes)
+        confirm_and_run("ruff check", skip_confirm=args.yes)
     elif args.task == "format":
-        confirm_and_run("ruff format", skip_confirm=args.yes)
+        confirm_and_run("ruff format --check", skip_confirm=args.yes)
     elif args.task == "docs":
         confirm_and_run("sphinx-build -j auto -b html docs/ docs/_build/html", skip_confirm=args.yes)
     elif args.task == "docs-clean":
