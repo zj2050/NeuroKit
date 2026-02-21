@@ -297,7 +297,7 @@ def _emg_activation_pelt(emg_cleaned, threshold="default", duration_min=0.05, **
     binary[changepoints[0::2]] = 0
     binary[changepoints[1::2]] = 1
 
-    activity = pd.Series(binary).ffill().values
+    activity = pd.Series(binary).ffill().to_numpy(copy=True)
 
     # Label as 1 to parts that have the larger SD (likely to be activations)
     if emg_cleaned[activity == 1].std() > emg_cleaned[activity == 0].std():
