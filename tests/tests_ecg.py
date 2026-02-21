@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
+import importlib
+
 import biosppy
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 
 import neurokit2 as nk
+
+ecg_delineate_module = importlib.import_module("neurokit2.ecg.ecg_delineate")
 
 
 def test_ecg_simulate():
@@ -272,6 +276,34 @@ def test_ecg_delineate():
     assert np.allclose(len(waves_cwt["ECG_P_Offsets"]), 22, atol=1)
     assert np.allclose(len(waves_cwt["ECG_T_Onsets"]), 22, atol=1)
     assert np.allclose(len(waves_cwt["ECG_T_Offsets"]), 22, atol=1)
+
+
+def test_ecg_delineate_cwt_rpeaks_nonpositive_peak_height(monkeypatch):
+    ecg = np.zeros(1000)
+    rpeaks = np.array([250])
+
+    def _fake_find_peaks(*args, **kwargs):
+        return np.array([50]), {
+            "peak_heights": np.array([0.0]),
+            "left_bases": np.array([10]),
+            "right_bases": np.array([10]),
+        }
+
+    monkeypatch.setattr(
+        ecg_delineate_module.scipy.signal, "find_peaks", _fake_find_peaks
+    )
+
+    onsets, offsets = ecg_delineate_module._onset_offset_delineator(
+        ecg,
+        rpeaks,
+        peak_type="rpeaks",
+        sampling_rate=1000,
+    )
+
+    assert len(onsets) == 1
+    assert len(offsets) == 1
+    assert not np.isnan(onsets[0])
+    assert not np.isnan(offsets[0])
 
 
 def test_ecg_invert():
