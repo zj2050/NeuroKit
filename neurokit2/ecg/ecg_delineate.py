@@ -891,7 +891,7 @@ def _onset_offset_delineator(ecg, peaks, peak_type="rpeaks", sampling_rate=1000)
                 if wt_peaks_data["peak_heights"][-1] > 0:
                     epsilon_onset = 0.05 * wt_peaks_data["peak_heights"][-1]
                 else:
-                    epsilon_onset = 0.07 * wt_peaks_data["peak_heights"][-1]
+                    epsilon_onset = 0.07 * abs(wt_peaks_data["peak_heights"][-1])
             elif peak_type == "ppeaks":
                 epsilon_onset = 0.50 * wt_peaks_data["peak_heights"][-1]
             elif peak_type == "tpeaks":
