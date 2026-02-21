@@ -43,6 +43,7 @@ setup_requirements = ["pytest-runner", "numpy"]
 test_requirements = requirements + [
     "pytest",
     "coverage",
+    "setuptools",
     "bioread",
     "mne",
     "pyentrp",

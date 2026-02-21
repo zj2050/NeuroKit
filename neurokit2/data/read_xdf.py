@@ -130,21 +130,13 @@ def read_xdf(
       # data, info = nk.read_xdf("data.xdf")
       # sampling_rate = info["sampling_rate"]
     """
-    try:
-        import pyxdf
-    except ImportError as e:
-        raise ImportError(
-            "The 'pyxdf' module is required for this function to run. ",
-            "Please install it first (`pip install pyxdf`).",
-        ) from e
-
     # DEPRECATION WARNING
     if fillmissing is not None:
         warnings.warn(
             "The 'fillmissing' argument is deprecated and has no direct equivalent in the new optimized implementation. "
             "This function uses 'scipy.interpolate' which interpolates across all gaps regardless of duration. "
             "If you need to mask large gaps, please do so on the returned DataFrame.",
-            Category=DeprecationWarning,
+            category=DeprecationWarning,
             stacklevel=2,
         )
 
@@ -891,6 +883,14 @@ def _load_xdf(
     """
     Extended wrapper for pyxdf.load_xdf that allows selective stream dejittering.
     """
+
+    try:
+        import pyxdf
+    except ImportError as e:
+        raise ImportError(
+            "The 'pyxdf' module is required for this function to run. "
+            "Please install it first (`pip install pyxdf`)."
+        ) from e
 
     # Check if filename is a URL string
     if isinstance(filename, str) and urllib.parse.urlparse(filename).scheme in (
