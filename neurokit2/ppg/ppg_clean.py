@@ -10,7 +10,7 @@ from ..signal import signal_fillmissing, signal_filter
 def ppg_clean(ppg_signal, sampling_rate=1000, heart_rate=None, method="elgendi"):
     """**Clean a photoplethysmogram (PPG) signal**
 
-    Clean a raw PPG signal for analysis by filtering to remove noise. This improves the accuracy of subsequent analyses, 
+    Clean a raw PPG signal for analysis by filtering to remove noise. This improves the accuracy of subsequent analyses,
     such as systolic peak detection.
 
     * ``'elgendi'`` (default): Bandpass filter the signal between 0.5 and 8 Hz using a Butterworth filter.
@@ -29,7 +29,7 @@ def ppg_clean(ppg_signal, sampling_rate=1000, heart_rate=None, method="elgendi")
     sampling_rate : int
         The sampling frequency of ``ppg_signal`` (in Hz, i.e., samples/second). The default is 1000.
     method : str
-        The processing pipeline to apply. Can be one of ``"elgendi"`` (default), ``"nabian2018"``, ``"goda2024"``, 
+        The processing pipeline to apply. Can be one of ``"elgendi"`` (default), ``"nabian2018"``, ``"goda2024"``,
         or ``"none"``. If ``"none"`` is passed, the raw signal will be returned without any cleaning.
 
     Returns
@@ -53,7 +53,7 @@ def ppg_clean(ppg_signal, sampling_rate=1000, heart_rate=None, method="elgendi")
       ppg = nk.ppg_simulate(heart_rate=75, duration=30)
       ppg_elgendi = nk.ppg_clean(ppg, method='elgendi')
       ppg_nabian = nk.ppg_clean(ppg, method='nabian2018', heart_rate=75)
-      
+
       # Plot and compare methods
       signals = pd.DataFrame({'PPG_Raw' : ppg,
                               'PPG_Elgendi' : ppg_elgendi,
@@ -134,7 +134,7 @@ def _ppg_clean_nabian2018(ppg_signal, sampling_rate, heart_rate=None):
     if heart_rate is not None:
         heart_rate = heart_rate / 60
 
-        if not highcut >= 10 * heart_rate and not highcut < 0.5 * sampling_rate:
+        if not (highcut >= 10 * heart_rate and highcut < 0.5 * sampling_rate):
             raise ValueError(
                 "Highcut value should be at least 10 times heart rate and"
                 " less than 0.5 times sampling rate."
