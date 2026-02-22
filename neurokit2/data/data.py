@@ -3,8 +3,11 @@ import json
 import os
 import pickle
 import urllib
+import pathlib
 
+import numpy as np
 import pandas as pd
+
 from sklearn import datasets as sklearn_datasets
 
 
@@ -195,7 +198,8 @@ def data(dataset="bio_eventrelated_100hz"):
     if dataset == "iris":
         info = sklearn_datasets.load_iris()
         data = pd.DataFrame(
-            info.data, columns=["Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width"]
+            info.data,
+            columns=["Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width"],
         )
         data["Species"] = info.target_names[info.target]
         return data
@@ -225,11 +229,36 @@ def data(dataset="bio_eventrelated_100hz"):
     # TODO: Add more EEG (fif and edf datasets)
     if dataset in ["eeg_1min_200hz"]:
 
-        return pickle.load(
-            urllib.request.urlopen(
-                "https://github.com/neuropsychology/NeuroKit/blob/dev/data/eeg_1min_200hz.pickle?raw=true"
+        try:
+            import mne  # pylint: disable=unused-import # noqa: F401
+        except ImportError:
+            raise ImportError(
+                "NeuroKit error: data(): the 'mne' module is required",
+                " for this dataset to be loaded. ",
+                "Please install it first (`pip install mne`).",
             )
-        )
+
+        url = "https://github.com/neuropsychology/NeuroKit/blob/dev/data/eeg_1min_200hz.pickle?raw=true"
+        with urllib.request.urlopen(url) as response:
+
+            # handle if system is posix (Windows paths are used in the pickle)
+            if os.name == "posix":
+                windows_backup = pathlib.WindowsPath
+                pathlib.WindowsPath = pathlib.PosixPath
+                raw = pickle.load(response)
+                pathlib.WindowsPath = windows_backup
+            else:
+                raw = pickle.load(response)
+
+        if (
+            hasattr(raw.info, "proj_id")
+            and isinstance(raw.info.proj_id, np.ndarray)
+            and raw.info.proj_id.size == 1
+        ):
+            raw.info["proj_id"] = int(raw.info.proj_id[0])
+        elif not hasattr(raw.info, "proj_id") or not isinstance(raw.info.proj_id, int):
+            raw.info.proj_id = None
+        return raw
 
     # General case
     file, ext = os.path.splitext(dataset)  # pylint: disable=unused-variable

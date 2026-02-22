@@ -39,12 +39,12 @@ def signal_filter(
     highcut : float
         Upper cutoff frequency in Hz. The default is ``None``.
     method : str
-        Can be one of ``"butterworth"``, ``"fir"``, ``"bessel"`` or ``"savgol"``. Note that for
-        Butterworth, the function uses the SOS method from :func:`.scipy.signal.sosfiltfilt`,
+        Can be one of ``"butterworth"``, ``"fir"``, ``"bessel"``, ``"chebyshevii"`` or ``"savgol"``. Note that for
+        Butterworth and Chebyshev, the function uses the SOS method from :func:`.scipy.signal.sosfiltfilt`,
         recommended for general purpose filtering. One can also specify ``"butterworth_ba"`` for a
         more traditional and legacy method (often implemented in other software).
     order : int
-        Only used if ``method`` is ``"butterworth"`` or ``"savgol"``. Order of the filter (default
+        Only used if ``method`` is ``"butterworth"``, ``"chebyshevii"`` or ``"savgol"``. Order of the filter (default
         is 2).
     window_size : int
         Only used if ``method`` is ``"savgol"``. The length of the filter window (i.e. the number of
@@ -166,10 +166,12 @@ def signal_filter(
             filtered = _signal_filter_bessel(signal_sanitized, sampling_rate, lowcut, highcut, order)
         elif method in ["fir"]:
             filtered = _signal_filter_fir(signal_sanitized, sampling_rate, lowcut, highcut, window_size=window_size)
+        elif method in ["chebyshevii"]:
+            filtered = _signal_filter_chebyshevii(signal_sanitized, sampling_rate, lowcut, highcut, order)
         else:
             raise ValueError(
                 "NeuroKit error: signal_filter(): 'method' should be",
-                " one of 'butterworth', 'butterworth_ba', 'butterworth_zi', 'bessel',",
+                " one of 'butterworth', 'butterworth_ba', 'butterworth_zi', 'bessel', 'chebyshevii'",
                 " 'savgol' or 'fir'.",
             )
 
@@ -367,3 +369,17 @@ def _signal_filter_missing(signal):
         return signal_interpolate(signal, method="linear"), missing
     else:
         return signal, missing
+
+
+# =============================================================================
+# Chebyshev
+# =============================================================================
+
+
+def _signal_filter_chebyshevii(signal, sampling_rate=1000, lowcut=None, highcut=None, order=5):
+    """Filter a signal using IIR Chebyshev Type II SOS method."""
+    freqs, filter_type = _signal_filter_sanitize(lowcut=lowcut, highcut=highcut, sampling_rate=sampling_rate)
+    # rs value of 20 was used in pyPPG:
+    sos = scipy.signal.cheby2(order, 20, freqs, btype=filter_type, output="sos", fs=sampling_rate)  
+    filtered = scipy.signal.sosfiltfilt(sos, signal)
+    return filtered

@@ -30,7 +30,7 @@ def ecg_simulate(
 
     Parameters
     ----------
-    duration : int
+    duration : Union[int, float]
         Desired recording length in seconds.
     sampling_rate : int
         The desired sampling rate (in Hz, i.e., samples/second).
@@ -114,7 +114,7 @@ def ecg_simulate(
 
     # Generate number of samples automatically if length is unspecified
     if length is None:
-        length = duration * sampling_rate
+        length = int(np.ceil(duration * sampling_rate))
     if duration is None:
         duration = length / sampling_rate
 

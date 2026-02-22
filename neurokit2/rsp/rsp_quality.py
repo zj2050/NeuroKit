@@ -19,11 +19,11 @@ def rsp_quality(rsp_cleaned, peaks=None, sampling_rate=1000, method="templatemat
       below 1 Hz (the "charlton2021" method in rsp_clean), and used the "bettermann1996" breath detection
       algorithm (the "bettermann1996" method in rsp_peaks).
 
-    * The ``"disimilarity"`` method (borrowed from Sabeti et al., 2019, who proposed it for the PPG signal)
-      computes a continuous index of quality of the RSP signal, by calculating the level of disimilarity between
+    * The ``"dissimilarity"`` method (borrowed from Sabeti et al., 2019, who proposed it for the PPG signal)
+      computes a continuous index of quality of the RSP signal, by calculating the level of dissimilarity between
       each individual breath and an average (template) breath shape (after they are normalised). A value of
-      zero indicates no disimilarity (i.e. equivalent breath shapes), whereas values above or below
-      indicate increasing disimilarity.
+      zero indicates no dissimilarity (i.e. equivalent breath shapes), whereas values above or below
+      indicate increasing dissimilarity.
 
     Parameters
     ----------
@@ -78,8 +78,8 @@ def rsp_quality(rsp_cleaned, peaks=None, sampling_rate=1000, method="templatemat
     # Sanitise method name
     if method in ["templatematch", "charlton2021", "charlton"]:
         method = "templatematch"
-    elif method in ["disimilarity", "sabeti2019"]:
-        method = "disimilarity"
+    elif method in ["dissimilarity", "sabeti2019"]:
+        method = "dissimilarity"
     else:
         raise ValueError(
             f"Method '{method}' not recognised. Please use 'templatematch'."
@@ -87,11 +87,11 @@ def rsp_quality(rsp_cleaned, peaks=None, sampling_rate=1000, method="templatemat
 
     # Do method-specific pre-processing
     if method in ["templatematch"]:
-        
+
         # Pre-process: Invert and detrend signal
         rsp_cleaned = -1 * scipy.signal.detrend(rsp_cleaned)
 
-    if method in ["templatematch", "disimilarity"]:
+    if method in ["templatematch", "dissimilarity"]:
 
         # Detect RSP peaks (if not done already)
         if peaks is None:

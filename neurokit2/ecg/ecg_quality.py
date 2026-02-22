@@ -33,11 +33,11 @@ def ecg_quality(
       and each individual beat's morphology. Therefore, it is possible that all beats exhibit high values (e.g. >0.95),
       indicative of consistent beat morphologies across the signal.
 
-    * The ``"disimilarity"`` method (loosely based on Sabeti et al., 2019) computes a continuous index
-      of quality of the ECG signal, by calculating the level of disimilarity between each individual
+    * The ``"dissimilarity"`` method (loosely based on Sabeti et al., 2019) computes a continuous index
+      of quality of the ECG signal, by calculating the level of dissimilarity between each individual
       beat shape and an average (template) beat shape (after they are normalised). A value of
-      zero indicates no disimilarity (i.e. equivalent beat shapes), whereas values above or below
-      indicate increasing disimilarity. The original method used dynamic time-warping to align the beat
+      zero indicates no dissimilarity (i.e. equivalent beat shapes), whereas values above or below
+      indicate increasing dissimilarity. The original method used dynamic time-warping to align the beat
       shapes prior to calculating the level of dissimilarity, whereas this implementation does not currently
       include this step.
 
@@ -75,7 +75,7 @@ def ecg_quality(
         The sampling frequency of the signal (in Hz, i.e., samples/second).
     method : str
         The method for computing ECG signal quality, can be ``"averageQRS"`` (default), ``"zhao2018"``,
-        ``"templatematch"``, or ``"ho2025"``.
+        ``"templatematch"``, ``"dissimilarity"`` or ``"ho2025"``.
     approach : str
         The data fusion approach as documented in Zhao et al. (2018). Can be ``"simple"``
         or ``"fuzzy"``. The former performs simple heuristic fusion of SQIs and the latter performs
@@ -131,7 +131,7 @@ def ecg_quality(
                      sampling_rate=300,
                      method="zhao2018",
                      approach="fuzzy")
-    
+
     * **Example 3:** Orphanidou et al. (2015) method
 
     .. ipython:: python
@@ -153,11 +153,11 @@ def ecg_quality(
     # Sanitise method name
     if method in ["templatematch", "orphanidou2015"]:
         method = "templatematch"
-    elif method in ["disimilarity", "sabeti2019"]:
-        method = "disimilarity"
+    elif method in ["dissimilarity", "sabeti2019"]:
+        method = "dissimilarity"
     elif method in ["ho2025", "ho", "ibi", "ici"]:
         method = "ici"
-    
+
     # Run quality assessment algorithm
     if method in ["averageqrs"]:
         quality = _ecg_quality_averageQRS(
@@ -177,7 +177,7 @@ def ecg_quality(
         quality = _ecg_quality_zhao2018(
             ecg_cleaned, rpeaks=rpeaks, sampling_rate=sampling_rate, mode=approach
         )
-    elif method in ["templatematch", "disimilarity"]:
+    elif method in ["templatematch", "dissimilarity"]:
         # Detect R peaks (if not done already)
         if rpeaks is None:
             _, rpeaks = ecg_peaks(ecg_cleaned, sampling_rate=sampling_rate)
@@ -193,7 +193,7 @@ def ecg_quality(
     elif method in ["ici"]:
         # Assess quality using IBI method (RR-interval accuracy prediction)
         quality = signal_quality(
-            ecg_cleaned, 
+            ecg_cleaned,
             signal_type="ecg",
             primary_detector="unsw",
             secondary_detector="neurokit",
@@ -399,6 +399,7 @@ def _ecg_quality_zhao2018(
 
         # basSQI
         # UbH
+        basSQI = basSQI * 100
         if basSQI <= 90:
             UbH = 0
         elif basSQI >= 95:
@@ -436,7 +437,7 @@ def _ecg_quality_zhao2018(
         if V < 1.5:
             return "Excellent"
         elif V >= 2.40:
-            return "Unnacceptable"
+            return "Unacceptable"
         else:
             return "Barely acceptable"
 
@@ -498,4 +499,4 @@ def _ecg_quality_basSQI(
     num_power = psd.iloc[0, 0]
     dem_power = psd.iloc[0, 1]
 
-    return (1 - num_power) / dem_power
+    return 1 - (num_power / dem_power)

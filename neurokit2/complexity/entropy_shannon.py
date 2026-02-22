@@ -131,7 +131,7 @@ def _entropy_freq(signal, symbolize=None, show=False):
         signal = np.array(signal)
 
     # Make discrete
-    if np.isscalar(signal) is False:
+    if not np.isscalar(signal):
         signal = complexity_symbolize(signal, method=symbolize, show=show)
 
     return np.unique(signal, return_counts=True)

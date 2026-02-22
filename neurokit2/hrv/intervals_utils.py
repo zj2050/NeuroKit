@@ -139,7 +139,7 @@ def _intervals_sanitize(intervals, intervals_time=None, remove_missing=True):
         # Confirm that timestamps are in seconds
         successive_intervals = _intervals_successive(intervals, intervals_time=intervals_time)
 
-        if np.all(successive_intervals) is False:
+        if not np.all(successive_intervals):
             # Check whether intervals appear to be interpolated
             if not _intervals_time_uniform(intervals_time):
                 # If none of the differences between timestamps match

@@ -147,7 +147,7 @@ def _mandelbrot(size=1000, real_range=(-2, 2), imaginary_range=(-2, 2), iteratio
         mask = (z * z.conjugate()).real < threshold
         mask = np.logical_and(mask, optim)
 
-        if np.all(~mask) is True:
+        if np.all(~mask):
             break
 
         # Increase

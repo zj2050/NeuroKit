@@ -89,7 +89,7 @@ def entropy_grid(signal, delay=1, k=3, show=False, **kwargs):
     info = {"k": k, "Delay": delay}
 
     # Normalization
-    Sig_n = (signal - min(signal)) / np.ptp(signal)
+    Sig_n = (signal - np.min(signal)) / (np.max(signal) - np.min(signal))
 
     # Poincaré Plot
     Temp = np.array([Sig_n[:-delay], Sig_n[delay:]])

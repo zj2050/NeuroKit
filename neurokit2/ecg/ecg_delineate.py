@@ -2,8 +2,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import scipy.signal
 import pywt
+import scipy.signal
 
 from ..epochs import epochs_create, epochs_to_df
 from ..signal import (
@@ -27,7 +27,7 @@ def ecg_delineate(
     show=False,
     show_type="peaks",
     check=False,
-    **kwargs
+    **kwargs,
 ):
     """**Delineate QRS complex**
 
@@ -140,8 +140,7 @@ def ecg_delineate(
             ecg_cleaned = ecg_cleaned[cols[0]].values
         else:
             raise ValueError(
-                "NeuroKit error: ecg_delineate(): Wrong input, we couldn't extract"
-                "cleaned signal."
+                "NeuroKit error: ecg_delineate(): Wrong input, we couldn't extract cleaned signal."
             )
 
     elif isinstance(ecg_cleaned, dict):
@@ -153,8 +152,7 @@ def ecg_delineate(
 
             else:
                 raise ValueError(
-                    "NeuroKit error: ecg_delineate(): Wrong input, we couldn't extract"
-                    "cleaned signal."
+                    "NeuroKit error: ecg_delineate(): Wrong input, we couldn't extract cleaned signal."
                 )
 
     elif isinstance(ecg_cleaned, pd.Series):
@@ -180,12 +178,13 @@ def ecg_delineate(
     elif method in ["dwt", "discrete wavelet transform"]:
         waves = _dwt_ecg_delineator(ecg_cleaned, rpeaks, sampling_rate=sampling_rate)
     elif method in ["prominence", "peak-prominence", "emrich", "emrich2024"]:
-        waves = _prominence_ecg_delineator(ecg_cleaned, rpeaks=rpeaks, sampling_rate=sampling_rate, **kwargs)
+        waves = _prominence_ecg_delineator(
+            ecg_cleaned, rpeaks=rpeaks, sampling_rate=sampling_rate, **kwargs
+        )
 
     else:
         raise ValueError(
-            "NeuroKit error: ecg_delineate(): 'method' should be one of 'peak', 'prominence',"
-            "'cwt' or 'dwt'."
+            "NeuroKit error: ecg_delineate(): 'method' should be one of 'peak', 'prominence', 'cwt' or 'dwt'."
         )
 
     # Ensure that all indices are not larger than ECG signal indices
@@ -214,7 +213,7 @@ def ecg_delineate(
             signals=signals,
             signal_features_type=show_type,
             sampling_rate=sampling_rate,
-            **kwargs
+            **kwargs,
         )
 
     if check is True:
@@ -766,11 +765,19 @@ def _prominence_ecg_delineator(ecg, rpeaks=None, sampling_rate=1000, **kwargs):
     max_qrs_interval = int(kwargs.get("max_qrs_interval", 180) * sampling_rate / 1000)
     max_pr_interval = int(kwargs.get("max_pr_interval", 300) * sampling_rate / 1000)
     max_r_rise_time = int(kwargs.get("max_r_rise_time", 120) * sampling_rate / 1000)
-    typical_st_segment = int(kwargs.get("typical_st_segment", 150) * sampling_rate / 1000)
+    typical_st_segment = int(
+        kwargs.get("typical_st_segment", 150) * sampling_rate / 1000
+    )
     # max basepoint intervals
-    max_p_basepoint_interval = int(kwargs.get("max_p_basepoint_interval", 100) * sampling_rate / 1000)
-    max_r_basepoint_interval = int(kwargs.get("max_r_basepoint_interval", 100) * sampling_rate / 1000)
-    max_t_basepoint_interval = int(kwargs.get("max_t_basepoint_interval", 200) * sampling_rate / 1000)
+    max_p_basepoint_interval = int(
+        kwargs.get("max_p_basepoint_interval", 100) * sampling_rate / 1000
+    )
+    max_r_basepoint_interval = int(
+        kwargs.get("max_r_basepoint_interval", 100) * sampling_rate / 1000
+    )
+    max_t_basepoint_interval = int(
+        kwargs.get("max_t_basepoint_interval", 200) * sampling_rate / 1000
+    )
 
     waves = {
         "ECG_P_Onsets": [],
@@ -809,15 +816,28 @@ def _prominence_ecg_delineator(ecg, rpeaks=None, sampling_rate=1000, **kwargs):
         local_extrema = np.concatenate((local_maxima, local_minima))
 
         # 3. compute prominence weight
-        weight_maxima = _calc_prominence(local_maxima, ecg_seg, current_wave["ECG_R_Peaks"])
-        weight_minima = _calc_prominence(local_minima, ecg_seg, current_wave["ECG_R_Peaks"], minima=True)
+        weight_maxima = _calc_prominence(
+            local_maxima, ecg_seg, current_wave["ECG_R_Peaks"]
+        )
+        weight_minima = _calc_prominence(
+            local_minima, ecg_seg, current_wave["ECG_R_Peaks"], minima=True
+        )
 
         if local_extrema.any():
             # find waves
             _prominence_find_q_wave(weight_minima, current_wave, max_r_rise_time)
-            _prominence_find_s_wave(ecg_seg, weight_minima, current_wave, max_qrs_interval)
-            _prominence_find_p_wave(local_maxima, weight_maxima, current_wave, max_pr_interval)
-            _prominence_find_t_wave(local_extrema, (weight_minima + weight_maxima), current_wave, typical_st_segment)
+            _prominence_find_s_wave(
+                ecg_seg, weight_minima, current_wave, max_qrs_interval
+            )
+            _prominence_find_p_wave(
+                local_maxima, weight_maxima, current_wave, max_pr_interval
+            )
+            _prominence_find_t_wave(
+                local_extrema,
+                (weight_minima + weight_maxima),
+                current_wave,
+                typical_st_segment,
+            )
             _prominence_find_on_offsets(
                 ecg_seg,
                 sampling_rate,
@@ -864,16 +884,22 @@ def _prominence_find_q_wave(weight_minima, current_wave, max_r_rise_time):
         return
     q_bound = max(current_wave["ECG_R_Peaks"] - max_r_rise_time, 0)
 
-    current_wave["ECG_Q_Peaks"] = np.argmax(weight_minima[q_bound : current_wave["ECG_R_Peaks"]]) + q_bound
+    current_wave["ECG_Q_Peaks"] = (
+        np.argmax(weight_minima[q_bound : current_wave["ECG_R_Peaks"]]) + q_bound
+    )
 
 
 def _prominence_find_s_wave(sig, weight_minima, current_wave, max_qrs_interval):
     if "ECG_Q_Peaks" not in current_wave:
         return
     s_bound = current_wave["ECG_Q_Peaks"] + max_qrs_interval
-    s_wave = np.argmax(weight_minima[current_wave["ECG_R_Peaks"] : s_bound] > 0) + current_wave["ECG_R_Peaks"]
+    s_wave = (
+        np.argmax(weight_minima[current_wave["ECG_R_Peaks"] : s_bound] > 0)
+        + current_wave["ECG_R_Peaks"]
+    )
     current_wave["ECG_S_Peaks"] = (
-        np.argmin(sig[current_wave["ECG_R_Peaks"] : s_bound]) + current_wave["ECG_R_Peaks"]
+        np.argmin(sig[current_wave["ECG_R_Peaks"] : s_bound])
+        + current_wave["ECG_R_Peaks"]
         if s_wave == current_wave["ECG_R_Peaks"]
         else s_wave
     )
@@ -883,18 +909,27 @@ def _prominence_find_p_wave(local_maxima, weight_maxima, current_wave, max_pr_in
     if "ECG_Q_Peaks" not in current_wave:
         return
     p_candidates = local_maxima[
-        (current_wave["ECG_Q_Peaks"] - max_pr_interval <= local_maxima) & (local_maxima <= current_wave["ECG_Q_Peaks"])
+        (current_wave["ECG_Q_Peaks"] - max_pr_interval <= local_maxima)
+        & (local_maxima <= current_wave["ECG_Q_Peaks"])
     ]
     if p_candidates.any():
-        current_wave["ECG_P_Peaks"] = p_candidates[np.argmax(weight_maxima[p_candidates])]
+        current_wave["ECG_P_Peaks"] = p_candidates[
+            np.argmax(weight_maxima[p_candidates])
+        ]
 
 
-def _prominence_find_t_wave(local_extrema, weight_extrema, current_wave, typical_st_segment):
+def _prominence_find_t_wave(
+    local_extrema, weight_extrema, current_wave, typical_st_segment
+):
     if "ECG_S_Peaks" not in current_wave:
         return
-    t_candidates = local_extrema[(current_wave["ECG_S_Peaks"] + typical_st_segment <= local_extrema)]
+    t_candidates = local_extrema[
+        (current_wave["ECG_S_Peaks"] + typical_st_segment <= local_extrema)
+    ]
     if t_candidates.any():
-        current_wave["ECG_T_Peaks"] = t_candidates[np.argmax(weight_extrema[t_candidates])]
+        current_wave["ECG_T_Peaks"] = t_candidates[
+            np.argmax(weight_extrema[t_candidates])
+        ]
 
 
 def _prominence_find_on_offsets(
@@ -928,7 +963,9 @@ def _prominence_find_on_offsets(
 
     # correct R-peak position towards local maxima (otherwise prominence will be falsely computed)
     r_pos = _correct_peak(sig, sampling_rate, current_wave["ECG_R_Peaks"])
-    _, r_on, r_off = scipy.signal.peak_prominences(sig, [r_pos], wlen=max_r_basepoint_interval)
+    _, r_on, r_off = scipy.signal.peak_prominences(
+        sig, [r_pos], wlen=max_r_basepoint_interval
+    )
     if not np.isnan(r_on):
         current_wave["ECG_R_Onsets"] = r_on[0]
 
@@ -953,7 +990,10 @@ def _correct_peak(sig, fs, peak, window=0.02):
 
 def _onset_offset_delineator(ecg, peaks, peak_type="rpeaks", sampling_rate=1000):
 
-    # first derivative of the Gaissian signal
+    if peak_type not in ["rpeaks", "tpeaks", "ppeaks"]:
+        raise ValueError(f"Unknown peak type '{peak_type}'")
+
+    # first derivative of the Gaussian signal
     scales = np.array([1, 2, 4, 8, 16])
     cwtmatr, __ = pywt.cwt(ecg, scales, "gaus1", sampling_period=1.0 / sampling_rate)
 
@@ -970,18 +1010,15 @@ def _onset_offset_delineator(ecg, peaks, peak_type="rpeaks", sampling_rate=1000)
             search_window = cwtmatr[2, index_peak - half_wave_width : index_peak]
             prominence = 0.20 * max(search_window)
             height = 0.0
-            wt_peaks, wt_peaks_data = scipy.signal.find_peaks(
-                search_window, height=height, prominence=prominence
-            )
 
-        elif peak_type in ["tpeaks", "ppeaks"]:
+        else:  # tpeaks or ppeaks
             search_window = -cwtmatr[4, index_peak - half_wave_width : index_peak]
-
             prominence = 0.10 * max(search_window)
             height = 0.0
-            wt_peaks, wt_peaks_data = scipy.signal.find_peaks(
-                search_window, height=height, prominence=prominence
-            )
+
+        wt_peaks, wt_peaks_data = scipy.signal.find_peaks(
+            search_window, height=height, prominence=prominence
+        )
 
         if len(wt_peaks) == 0:
             # print("Fail to find onset at index: %d", index_peak)
@@ -992,13 +1029,19 @@ def _onset_offset_delineator(ecg, peaks, peak_type="rpeaks", sampling_rate=1000)
             if peak_type == "rpeaks":
                 if wt_peaks_data["peak_heights"][-1] > 0:
                     epsilon_onset = 0.05 * wt_peaks_data["peak_heights"][-1]
+                else:
+                    epsilon_onset = 0.07 * wt_peaks_data["peak_heights"][-1]
             elif peak_type == "ppeaks":
                 epsilon_onset = 0.50 * wt_peaks_data["peak_heights"][-1]
             elif peak_type == "tpeaks":
                 epsilon_onset = 0.25 * wt_peaks_data["peak_heights"][-1]
             leftbase = wt_peaks_data["left_bases"][-1] + index_peak - half_wave_width
             if peak_type == "rpeaks":
-                candidate_onsets = np.where(cwtmatr[2, nfirst - 100 : nfirst] < epsilon_onset)[0] + nfirst - 100
+                candidate_onsets = (
+                    np.where(cwtmatr[2, nfirst - 100 : nfirst] < epsilon_onset)[0]
+                    + nfirst
+                    - 100
+                )
             elif peak_type in ["tpeaks", "ppeaks"]:
                 candidate_onsets = (
                     np.where(-cwtmatr[4, nfirst - 100 : nfirst] < epsilon_onset)[0]
@@ -1013,29 +1056,36 @@ def _onset_offset_delineator(ecg, peaks, peak_type="rpeaks", sampling_rate=1000)
                 onsets.append(max(candidate_onsets))
 
         # find offset
+        height = 0.0
         if peak_type == "rpeaks":
             search_window = -cwtmatr[2, index_peak : index_peak + half_wave_width]
             prominence = 0.50 * max(search_window)
-            wt_peaks, wt_peaks_data = scipy.signal.find_peaks(
-                search_window, height=height, prominence=prominence
-            )
 
         elif peak_type in ["tpeaks", "ppeaks"]:
             search_window = cwtmatr[4, index_peak : index_peak + half_wave_width]
             prominence = 0.10 * max(search_window)
-            wt_peaks, wt_peaks_data = scipy.signal.find_peaks(
-                search_window, height=height, prominence=prominence
-            )
+
+        wt_peaks, wt_peaks_data = scipy.signal.find_peaks(
+            search_window, height=height, prominence=prominence
+        )
 
         if len(wt_peaks) == 0:
             # print("Fail to find offsets at index: %d", index_peak)
             offsets.append(np.nan)
         else:
             nlast = wt_peaks[0] + index_peak
-            epsilon_offset = 0  # Default value
+
             if peak_type == "rpeaks":
-                if wt_peaks_data["peak_heights"][0] > 0:
-                    epsilon_offset = 0.125 * wt_peaks_data["peak_heights"][0]
+                # Use the actual (non-negated) WT value at n_last for the sign check, per Martinez (2004) eq. A.10
+                wt_nlast = cwtmatr[2, nlast]
+                if wt_nlast > 0:
+                    epsilon_offset = 0.125 * wt_nlast
+                else:
+                    epsilon_offset = 0.71 * wt_nlast
+                candidate_offsets = (
+                    np.where(cwtmatr[2, nlast : nlast + 100] < epsilon_offset)[0]
+                    + nlast
+                )
             elif peak_type == "ppeaks":
                 epsilon_offset = 0.9 * wt_peaks_data["peak_heights"][0]
             elif peak_type == "tpeaks":
@@ -1043,7 +1093,7 @@ def _onset_offset_delineator(ecg, peaks, peak_type="rpeaks", sampling_rate=1000)
             rightbase = wt_peaks_data["right_bases"][0] + index_peak
             if peak_type == "rpeaks":
                 candidate_offsets = (
-                    np.where((-cwtmatr[2, nlast : nlast + 100]) < epsilon_offset)[0]
+                    np.where(cwtmatr[2, nlast : nlast + 100] < epsilon_offset)[0]
                     + nlast
                 )
             elif peak_type in ["tpeaks", "ppeaks"]:
@@ -1305,42 +1355,66 @@ def _ecg_delineate_plot(
     sampling_rate=1000,
     window_start=-0.35,
     window_end=0.55,
-    **kwargs
+    **kwargs,
 ):
-    """
-    import neurokit2 as nk
-    import numpy as np
-    import pandas as pd
-    import matplotlib.pyplot as plt
+    """Plot delineated ECG wave features around R-peaks.
 
-    ecg_signal = nk.data("ecg_100hz")
+    Examples
+    --------
+    .. ipython:: python
 
-    # Extract R-peaks locations
-     _, rpeaks = nk.ecg_peaks(ecg_signal, sampling_rate=1000)
+      import matplotlib.pyplot as plt
+      import neurokit2 as nk
 
-    # Delineate the ECG signal with ecg_delineate()
-    signals, waves = nk.ecg_delineate(ecg_signal, rpeaks, sampling_rate=1000)
+      ecg_signal = nk.data("ecg_100hz")
 
-    # Plot the ECG signal with markings on ECG peaks
-    _ecg_delineate_plot(ecg_signal, rpeaks=rpeaks, signals=signals,
-                        signal_features_type='peaks', sampling_rate=1000)
+      # Extract R-peaks locations
+      _, rpeaks = nk.ecg_peaks(ecg_signal, sampling_rate=1000)
 
-    # Plot the ECG signal with markings on boundaries of R peaks
-    _ecg_delineate_plot(ecg_signal, rpeaks=rpeaks, signals=signals,
-                        signal_features_type='bound_R', sampling_rate=1000)
+      # Delineate the ECG signal
+      signals, waves = nk.ecg_delineate(ecg_signal, rpeaks, sampling_rate=1000)
 
-    # Plot the ECG signal with markings on boundaries of P peaks
-    _ecg_delineate_plot(ecg_signal, rpeaks=rpeaks, signals=signals,
-                        signal_features_type='bound_P', sampling_rate=1000)
+      # Plot the ECG signal with markings on ECG peaks
+      _ecg_delineate_plot(
+          ecg_signal,
+          rpeaks=rpeaks,
+          signals=signals,
+          signal_features_type="peaks",
+          sampling_rate=1000,
+      )
 
-    # Plot the ECG signal with markings on boundaries of T peaks
-    _ecg_delineate_plot(ecg_signal, rpeaks=rpeaks, signals=signals,
-                        signal_features_type='bound_T', sampling_rate=1000)
+      # Plot boundaries of R, P, and T waves
+      _ecg_delineate_plot(
+          ecg_signal,
+          rpeaks=rpeaks,
+          signals=signals,
+          signal_features_type="bounds_R",
+          sampling_rate=1000,
+      )
+      _ecg_delineate_plot(
+          ecg_signal,
+          rpeaks=rpeaks,
+          signals=signals,
+          signal_features_type="bounds_P",
+          sampling_rate=1000,
+      )
+      _ecg_delineate_plot(
+          ecg_signal,
+          rpeaks=rpeaks,
+          signals=signals,
+          signal_features_type="bounds_T",
+          sampling_rate=1000,
+      )
 
-    # Plot the ECG signal with markings on all peaks and boundaries
-    _ecg_delineate_plot(ecg_signal, rpeaks=rpeaks, signals=signals,
-                        signal_features_type='all', sampling_rate=1000)
-
+      # Plot all peaks and boundaries
+      _ecg_delineate_plot(
+          ecg_signal,
+          rpeaks=rpeaks,
+          signals=signals,
+          signal_features_type="all",
+          sampling_rate=1000,
+      )
+      plt.show()
     """
 
     data = pd.DataFrame({"Signal": list(ecg_signal)})
