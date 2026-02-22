@@ -22,7 +22,7 @@ jobs:
                   pip install sphinx-book-theme
                   pip install sphinxemoji
                   pip install sphinx-copybutton
-                  pip install ipykernel
+                  pip install ipykernel==6.29.5
                   pip install ipython
                   pip install myst-parser
                   pip install myst-nb
@@ -39,9 +39,9 @@ jobs:
                   pip install cvxopt
                   pip install ts2vg
                   pip install pickleshare
-                  pip install https://github.com/neuropsychology/neurokit/zipball/dev
+                  pip install -e .
 
             - name: Build documentation 📜
               run: |
                   cd docs
-                  sphinx-build -b html . _build
+                  sphinx-build --keep-going -b html . _build

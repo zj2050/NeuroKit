@@ -290,7 +290,7 @@ def test_signal_rate():  # since singal_rate wraps signal_period, the latter is 
 def test_signal_period():
     # Test warning path of no peaks
     with pytest.warns(nk.NeuroKitWarning, match=r"Too few peaks detected to compute the rate."):
-        nk.signal_period(np.zeros)
+        nk.signal_period(np.zeros(1))
 
 
 def test_signal_plot():
@@ -458,3 +458,157 @@ def test_signal_surrogate():
         np.mean(np.abs(np.abs(np.fft.rfft(surrogate - np.mean(surrogate)))
                        - np.abs(np.fft.rfft(x - np.mean(x))))) < 0.1
     )
+
+
+def test_signal_quality():
+
+    # smoke test for each signal type
+    duration = 30
+    sampling_rate = 100
+    random_state = 42
+    freq = 1
+
+    for signal_type in ['ppg', 'ecg', 'rsp']:
+        # setup for this signal
+        if signal_type == 'ppg':
+            signal = nk.ppg_simulate(
+                    duration=duration,
+                    ibi_randomness=0,
+                    frequency_modulation=0,
+                    powerline_amplitude=0,
+                    motion_amplitude=0,
+                    random_state=random_state,
+                    sampling_rate=sampling_rate
+            )
+            _, peaks = nk.ppg_peaks(signal, sampling_rate=sampling_rate)
+            cycle_inds = peaks["PPG_Peaks"]
+        elif signal_type == 'ecg':
+            signal = nk.ecg_simulate(
+                    duration=duration,
+                    noise=0,
+                    random_state=random_state,
+                    sampling_rate=sampling_rate
+            )
+            _, rpeaks = nk.ecg_peaks(signal, sampling_rate=sampling_rate)
+            cycle_inds = rpeaks["ECG_R_Peaks"]
+        elif signal_type == 'rsp':
+            signal = nk.rsp_simulate(
+                    duration=duration,
+                    noise=0,
+                    random_state=random_state,
+                    sampling_rate=sampling_rate
+            )
+            signal = -1 * scipy.signal.detrend(signal)
+            _, peaks = nk.rsp_peaks(signal, sampling_rate=sampling_rate, method="bettermann1996")
+            cycle_inds = peaks["RSP_Peaks"]
+
+        # assess quality for this signal using each method
+        for method in ['templatematch', 'dissimilarity', 'ici']:
+            if method == 'ici' and signal_type == 'rsp':
+                # ASSERTION: Check that the specific ValueError is raised
+                with pytest.raises(ValueError, match=r"`method` 'ici' is only supported for 'ppg' and 'ecg' signal types."):
+                    # Call the function with the problematic inputs
+                    quality = nk.signal_quality(
+                        signal, sampling_rate=sampling_rate, cycle_inds=cycle_inds, signal_type=signal_type, method=method
+                        )
+                continue  # skip for ICI and RSP (as these aren't compatible)
+            quality = nk.signal_quality(
+                signal, sampling_rate=sampling_rate, cycle_inds=cycle_inds, signal_type=signal_type, method=method
+                )
+            # check output is of expected length (same length as input signal)
+            assert len(quality) == duration*sampling_rate
+
+            # Check regressions in outputs
+            if signal_type == 'ppg':
+                if method == 'templatematch':
+                    assert np.isclose(np.mean(quality), 1, atol=1e-2)
+                elif method == 'dissimilarity':
+                    assert np.isclose(np.mean(quality), 0, atol=1e-3)
+                elif method == 'ici':
+                    assert np.isclose(np.mean(quality), 1, atol=1e-3)
+            elif signal_type == 'ecg':
+                if method == 'templatematch':
+                    assert np.isclose(np.mean(quality), 1, atol=1e-1)
+                elif method == 'dissimilarity':
+                    assert np.isclose(np.mean(quality), 0, atol=1e-3)
+                elif method == 'ici':
+                    assert np.isclose(np.mean(quality), 1, atol=1e-1)
+            elif signal_type == 'rsp':
+                if method == 'templatematch':
+                    assert np.isclose(np.mean(quality), 1, atol=1e-2)
+                elif method == 'dissimilarity':
+                    assert np.isclose(np.mean(quality), 0, atol=1e-3)
+
+
+    # Test on zero signals
+    signal_zeros = np.zeros(sampling_rate*duration)
+    peaks = np.array([])
+
+    # Test unknown method name
+    with pytest.raises(ValueError, match="method does not exist in signal_quality"):
+        _ = nk.signal_quality(signal_zeros, cycle_inds=[1], signal_type="ecg", method="unknown", sampling_rate=sampling_rate)
+
+    with pytest.raises(ValueError, match="require at least one detected peak."):
+        _ = nk.signal_quality(signal_zeros, cycle_inds=peaks, signal_type="ecg", method="templatematch", sampling_rate=sampling_rate)
+
+    with pytest.raises(ValueError, match="require at least one detected peak."):
+        _ = nk.signal_quality(signal_zeros, cycle_inds=peaks, signal_type="ecg", method="dissimilarity", sampling_rate=sampling_rate)
+
+    quality = nk.signal_quality(signal_zeros, cycle_inds=peaks, signal_type="ecg", method="ici", sampling_rate=sampling_rate)
+
+    assert np.allclose(quality, np.zeros_like(quality))
+
+    # Test on sine waves (quality should be perfect)
+    # Generate initial signal
+    signal = nk.signal_simulate(duration=duration, frequency=freq, sampling_rate=sampling_rate)
+    peaks = nk.signal_findpeaks(signal)["Peaks"]
+
+    # Add phase such that the signal starts with a peak
+    first_peak = peaks[0]
+    signal = signal[first_peak:]
+    peaks = peaks[1:] - first_peak
+
+    quality = nk.signal_quality(signal, cycle_inds=peaks, signal_type="ecg", method="templatematch", sampling_rate=sampling_rate)
+    assert np.allclose(quality, np.ones_like(quality))
+
+    quality = nk.signal_quality(signal, cycle_inds=peaks, signal_type="ecg", method="dissimilarity", sampling_rate=sampling_rate)
+    assert np.allclose(quality, np.zeros_like(quality))
+
+    # Test on signals that cancel each other out
+    signal = nk.signal_simulate(duration=duration, frequency=freq, sampling_rate=sampling_rate)
+    peaks = nk.signal_findpeaks(signal)["Peaks"]
+
+    first_peak = peaks[0] + 25
+    last_peak = peaks[-1] + 25
+    mid_peak = peaks[15] - 75
+    signal = signal[first_peak:]
+    peaks = peaks[1:-1] - first_peak
+    signal[mid_peak:] = - signal[mid_peak:]
+    peaks = [peak if peak < len(signal) // 2 else peak + 100 for peak in peaks]
+
+    signal = signal[:last_peak]
+    peaks_s = np.zeros_like(signal)
+    peaks_s[peaks] = 1
+
+    quality = nk.signal_quality(signal, cycle_inds=peaks, signal_type="ecg", method="templatematch", sampling_rate=sampling_rate)
+    assert np.isclose(np.mean(quality), 0, atol=1e-3)
+
+    quality = nk.signal_quality(signal, cycle_inds=peaks, signal_type="ecg", method="dissimilarity", sampling_rate=sampling_rate)
+    assert np.isclose(np.mean(quality), 0, atol=1e-1)
+
+
+    # Test signals without peaks
+    signal_zeros = np.zeros(sampling_rate*duration)
+    peaks = np.array([])
+
+    with pytest.raises(ValueError, match="`templatematch` and `dissimilarity` require at least one detected peak."):
+        _ = nk.signal_quality(signal_zeros, cycle_inds=peaks, signal_type="ecg", method="templatematch", sampling_rate=sampling_rate)
+
+    with pytest.raises(ValueError, match="`templatematch` and `dissimilarity` require at least one detected peak."):
+        _ = nk.signal_quality(signal_zeros, cycle_inds=peaks, signal_type="ecg", method="dissimilarity", sampling_rate=sampling_rate)
+
+    quality = nk.signal_quality(signal_zeros, cycle_inds=peaks, signal_type="ecg", method="ici", sampling_rate=sampling_rate)
+
+    assert np.allclose(quality, np.zeros_like(quality))
+
+

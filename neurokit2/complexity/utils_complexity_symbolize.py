@@ -275,7 +275,11 @@ def complexity_symbolize(
             elif method == "linear":
                 symbolic = np.digitize(
                     signal,
-                    np.arange(np.min(signal), np.max(signal), np.ptp(signal) / c),
+                    np.arange(
+                        np.min(signal),
+                        np.max(signal),
+                        (np.max(signal) - np.min(signal)) / c,
+                    ),
                 )
             elif method == "uniform":
                 symbolic = np.zeros(len(signal))

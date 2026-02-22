@@ -303,6 +303,9 @@ def _emg_activation_pelt(emg_cleaned, threshold="default", duration_min=0.05, **
     if emg_cleaned[activity == 1].std() > emg_cleaned[activity == 0].std():
         activity = np.abs(activity - 1)
 
+    # Ensure activity is writable
+    activity = np.array(activity, copy=True)
+
     activity[0] = 0
     activity[-1] = 0
 

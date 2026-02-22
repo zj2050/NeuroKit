@@ -7,7 +7,7 @@ import scipy.signal
 
 def signal_resample(
     signal,
-    desired_length=None,
+    desired_length=(),
     sampling_rate=None,
     desired_sampling_rate=None,
     method="interpolation",
@@ -104,8 +104,10 @@ def signal_resample(
                                  sampling_rate=1000, desired_sampling_rate=500)
 
     """
-    if desired_length is None:
-        desired_length = int(np.round(len(signal) * desired_sampling_rate / sampling_rate))
+    if desired_length == ():  # noqa: F632
+        desired_length = int(
+            np.round(len(signal) * desired_sampling_rate / sampling_rate)
+        )
 
     # Sanity checks
     if len(signal) == desired_length:
@@ -156,15 +158,17 @@ def _resample_poly(signal, desired_length):
 
 
 def _resample_pandas(signal, desired_length):
-    # Convert to Time Series
-    index = pd.date_range("20131212", freq="ms", periods=len(signal))
+    # Scale the index so both the original and target step sizes are integer nanoseconds:
+    # original step = desired_length ns, new step = len(signal) ns.  This guarantees an
+    # exact integer-nanosecond resampling frequency for every up- and down-sampling ratio,
+    # avoiding pandas 2.x "incompatible unit" errors that arise with fractional μs steps.
+    L = len(signal)
+    D = int(desired_length)
+    index = pd.date_range("20131212", freq=str(D) + "ns", periods=L)
     resampled_signal = pd.Series(signal, index=index)
 
-    # Create resampling factor
-    resampling_factor = str(np.round(1 / (desired_length / len(signal)), 6)) + "ms"
-
     # Resample
-    resampled_signal = resampled_signal.resample(resampling_factor).bfill().values
+    resampled_signal = resampled_signal.resample(str(L) + "ns").bfill().values
 
     # Sanitize
     resampled_signal = _resample_sanitize(resampled_signal, desired_length)

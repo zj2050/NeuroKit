@@ -116,7 +116,7 @@ def signal_plot(
         vector = signal[col]
         if vector.nunique() == 2:
             indices = np.where(vector == np.max(vector.unique()))
-            if bool(np.any(np.diff(indices) == 1)) is False:
+            if not np.any(np.diff(indices) == 1):
                 events_columns.append(col)
                 continuous_columns.remove(col)
 

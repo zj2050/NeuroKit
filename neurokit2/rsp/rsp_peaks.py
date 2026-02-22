@@ -17,6 +17,7 @@ def rsp_peaks(rsp_cleaned, sampling_rate=1000, method="khodadad2018", **kwargs):
       ``resp()`` function.
     * **scipy** Uses the `scipy <https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.find_peaks.html>`_
       peak-detection function.
+    * **schafer2008**: Uses the count-orig algorithm proposed in Schafer et al. (2008).
 
     Parameters
     ----------
@@ -25,8 +26,8 @@ def rsp_peaks(rsp_cleaned, sampling_rate=1000, method="khodadad2018", **kwargs):
     sampling_rate : int
         The sampling frequency of :func:`.rsp_cleaned` (in Hz, i.e., samples/second).
     method : str
-        The processing pipeline to apply. Can be one of ``"khodadad2018"`` (default), ``"biosppy"``
-        or ``"scipy"``.
+        The processing pipeline to apply. Can be one of ``"khodadad2018"`` (default), ``"biosppy"``,
+        ``"scipy"``, or ``"schafer2008"``.
     **kwargs
         Other arguments to be passed to the different peak finding methods. See
         :func:`.rsp_findpeaks`.
@@ -70,10 +71,27 @@ def rsp_peaks(rsp_cleaned, sampling_rate=1000, method="khodadad2018", **kwargs):
     * Khodadad, D., Nordebo, S., Müller, B., Waldmann, A., Yerworth, R., Becher, T., ... & Bayford,
       R. (2018). Optimized breath detection algorithm in electrical impedance tomography.
       Physiological measurement, 39(9), 094001.
+    * Schafer, A. and Kratky K.W. (2008). Estimation of breathing rate from respiratory sinus arrhythmia:
+      comparison of various methods. Annals of Biomedical Engineering, 36(3), 476–85.
 
     """
-    info = rsp_findpeaks(rsp_cleaned, sampling_rate=sampling_rate, method=method, **kwargs)
+    # Store info
+    info = {"method_peaks": method.lower(), "method_fixpeaks": "None"}
+
+    # Find peaks
+    info.update(
+        rsp_findpeaks(
+            rsp_cleaned,
+            sampling_rate=sampling_rate,
+            method=method,
+            **kwargs
+        )
+    )
+
+    # Fix peaks
     info = rsp_fixpeaks(info)
+
+    # Format peaks
     peak_signal = signal_formatpeaks(
         info, desired_length=len(rsp_cleaned), peak_indices=info["RSP_Peaks"]
     )

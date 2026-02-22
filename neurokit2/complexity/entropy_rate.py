@@ -102,11 +102,11 @@ def entropy_rate(signal, kmax=10, symbolize="mean", show=False):
         signal = np.array(signal)
 
     # Make discrete
-    if np.isscalar(signal) is False:
+    if not np.isscalar(signal):
         signal = complexity_symbolize(signal, method=symbolize)
 
     # Convert into range if integer
-    if np.isscalar(kmax) is True:
+    if np.isscalar(kmax):
         kmax = np.arange(1, kmax + 1)
 
     # Compute self-entropy

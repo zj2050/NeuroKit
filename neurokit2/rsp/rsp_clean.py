@@ -21,6 +21,8 @@ def rsp_clean(rsp_signal, sampling_rate=1000, method="khodadad2018", **kwargs):
       detrending).
     * **hampel**: Applies a median-based Hampel filter by replacing values which are 3 (can be
       changed via ``threshold``) :func:`.mad` away from the rolling median.
+    * **charlton2021**: Second order 1 Hz lowpass Butterworth filter. Note that is doesn't include
+      the Tukey window step proposed in Charlton et al.
 
     Parameters
     ----------
@@ -71,6 +73,8 @@ def rsp_clean(rsp_signal, sampling_rate=1000, method="khodadad2018", **kwargs):
       Characteristics of respiratory measures in young adults scanned at rest,
       including systematic changes and “missed” deep breaths.
       NeuroImage, Volume 204, 116234
+    * Charlton, P.H, et al. (2021). An impedance pneumography signal quality index: Design, assessment
+      and application to respiratory rate monitoring. Biomedical Signal Processing and Control, 65, 102339.
 
     """
     rsp_signal = as_vector(rsp_signal)
@@ -91,15 +95,14 @@ def rsp_clean(rsp_signal, sampling_rate=1000, method="khodadad2018", **kwargs):
     elif method == "biosppy":
         clean = _rsp_clean_biosppy(rsp_signal, sampling_rate)
     elif method in ["power", "power2020", "hampel"]:
-        clean = _rsp_clean_hampel(
-            rsp_signal,
-            **kwargs,
-        )
+        clean = _rsp_clean_hampel(rsp_signal,**kwargs)
+    elif method in ["charlton", "charlton2021"]:
+        clean = _rsp_clean_charlton2021(rsp_signal, sampling_rate)
     elif method is None or method == "none":
         clean = rsp_signal
     else:
         raise ValueError(
-            "NeuroKit error: rsp_clean(): 'method' should be one of 'khodadad2018', 'biosppy' or 'hampel'."
+            "NeuroKit error: rsp_clean(): 'method' should be one of 'charlton2021', 'khodadad2018', 'biosppy' or 'hampel'."
         )
 
     return clean
@@ -113,6 +116,28 @@ def _rsp_clean_missing(rsp_signal):
     rsp_signal = pd.DataFrame.pad(pd.Series(rsp_signal))
 
     return rsp_signal
+
+
+# =============================================================================
+# Charlton et al. (2021)
+# =============================================================================
+def _rsp_clean_charlton2021(rsp_signal, sampling_rate=1000):
+    """The algorithm is a low-pass filter with cutoff of 1 Hz (i.e. 60 breaths per minute).
+    It is loosely based on that described in `Charlton et al. (2021)
+
+    <https://doi.org/10.1016/j.bspc.2020.102339>`_.
+
+    """
+    
+    clean = signal_filter(
+        rsp_signal,
+        sampling_rate=sampling_rate,
+        highcut=1,
+        order=2,
+        method="butterworth",  # Whereas Charlton et al used an FIR filter designed using the Kaiser window method
+    )
+
+    return clean
 
 
 # =============================================================================

@@ -58,8 +58,7 @@ __bibtex__ = r"""
 }
 """
 
-__cite__ = (
-    """
+__cite__ = """
 You can cite NeuroKit2 as follows:
 
 - Makowski, D., Pham, T., Lau, Z. J., Brammer, J. C., Lespinasse, F., Pham, H.,
@@ -68,9 +67,7 @@ Behavior Research Methods, 53(4), 1689-1696. https://doi.org/10.3758/s13428-020-
 
 
 Full bibtex reference:
-"""
-    + __bibtex__
-)
+""" + __bibtex__
 # Aliases for citation
 __citation__ = __cite__
 
