@@ -201,6 +201,7 @@ ignore = [
     "PLR0915", # Too many statements
     "PLR0914", # Too many local variables
     "PLC0415", # Allow imports inside functions (useful for heavy optional dependencies)
+    "PLR2004", # Allows magic values in comparisons
 ]
 
 [tool.ruff.lint.pylint]
