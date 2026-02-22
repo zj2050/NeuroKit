@@ -311,18 +311,6 @@ def test_hrv_symbolic():
         "HRV_Symbolic_EqualProb4_1V",
         "HRV_Symbolic_EqualProb4_2LV",
         "HRV_Symbolic_EqualProb4_2UV",
-        "HRV_Symbolic_EqualProb6_0V",
-        "HRV_Symbolic_EqualProb6_1V",
-        "HRV_Symbolic_EqualProb6_2LV",
-        "HRV_Symbolic_EqualProb6_2UV",
-        "HRV_Symbolic_MaxMin6_0V",
-        "HRV_Symbolic_MaxMin6_1V",
-        "HRV_Symbolic_MaxMin6_2LV",
-        "HRV_Symbolic_MaxMin6_2UV",
-        "HRV_Symbolic_Sigma05_0V",
-        "HRV_Symbolic_Sigma05_1V",
-        "HRV_Symbolic_Sigma05_2LV",
-        "HRV_Symbolic_Sigma05_2UV",
     ]
     assert list(HRV_Symbolic.columns) == expected_columns
 

@@ -595,9 +595,9 @@ def _hrv_dfa(rri, out, n_windows="default", **kwargs):
 def hrv_symbolic(
     peaks,
     sampling_rate=1000,
-    quantization_level_equal_prob=(4, 6),
-    quantization_level_max_min=(6,),
-    sigma_rate=(0.05,),
+    quantization_level_equal_prob=(4,),
+    quantization_level_max_min=(),
+    sigma_rate=(),
 ):
     """**Symbolic dynamics indices of Heart Rate Variability (HRV)**
 
@@ -628,6 +628,20 @@ def hrv_symbolic(
     across individuals or conditions, as it is invariant to the marginal distribution of RR
     intervals.
 
+    The following parameterizations have been used in the literature:
+
+    * ``quantization_level_equal_prob=(4,)`` is the most common choice and is recommended for 
+      cross-subject comparisons due to its invariance to the RR interval distribution (Cysarz et 
+      al., 2018).
+    * ``quantization_level_equal_prob=(4, 6)`` together with ``quantization_level_max_min=(6,)``
+      and ``sigma_rate=(0.05,)`` allows direct comparison across all three quantization methods
+      at matched levels, as done in Cysarz et al. (2013).
+    * The sigma method with ``sigma_rate=0.05`` was used in the original autonomic blockade
+      validation work (Porta et al., 2007) and is the most physiologically interpreted variant,
+      with 0V linked to sympathetic and 2V to parasympathetic dominance.
+    * ``quantization_level_max_min=(6,)`` should generally be avoided for cross-subject
+      comparisons as it is sensitive to outliers in the RR series.
+
     Parameters
     ----------
     peaks : dict or list
@@ -636,11 +650,14 @@ def hrv_symbolic(
     sampling_rate : int, optional
         Sampling rate (Hz) of the continuous cardiac signal in which the peaks occur. Default 1000.
     quantization_level_equal_prob : tuple of int, optional
-        Quantization levels for the equal-probability method. Default ``(4, 6)``.
+        Quantization levels for the equal-probability method. Default ``(4,)`` (the most commonly
+        reported variant). Pass e.g. ``(4, 6)`` to include additional levels.
     quantization_level_max_min : tuple of int, optional
-        Quantization levels for the max-min method. Default ``(6,)``.
+        Quantization levels for the max-min method. Default ``()`` (disabled). Pass e.g. ``(6,)``
+        to enable.
     sigma_rate : tuple of float, optional
-        Sigma rates for the sigma method. Default ``(0.05,)``.
+        Sigma rates for the sigma method. Default ``()`` (disabled). Pass e.g. ``(0.05,)`` to
+        enable.
 
     Returns
     -------
@@ -648,10 +665,10 @@ def hrv_symbolic(
         Contains the HRV symbolic dynamics indices. Column names follow the pattern
         ``HRV_SymDyn_{Method}{Level}_{Family}``, e.g.:
 
-        * **HRV_Symbolic_EqualProb4_0V / _1V / _2LV / _2UV**
-        * **HRV_Symbolic_EqualProb6_0V / _1V / _2LV / _2UV**
-        * **HRV_Symbolic_MaxMin6_0V / _1V / _2LV / _2UV**
-        * **HRV_Symbolic_Sigma05_0V / _1V / _2LV / _2UV** (``05`` = sigma_rate × 100, zero-padded)
+        * **HRV_Symbolic_EqualProb4_0V / _1V / _2LV / _2UV** (default)
+        * **HRV_Symbolic_EqualProb6_0V / _1V / _2LV / _2UV** (if level 6 requested)
+        * **HRV_Symbolic_MaxMin6_0V / _1V / _2LV / _2UV** (if max-min enabled)
+        * **HRV_Symbolic_Sigma05_0V / _1V / _2LV / _2UV** (if sigma enabled; ``05`` = rate × 100)
 
     See Also
     --------
@@ -697,9 +714,9 @@ def hrv_symbolic(
 
 def _hrv_symbolic_dynamics(
     rri,
-    quantization_level_equal_prob=(4, 6),
-    quantization_level_max_min=(6,),
-    sigma_rate=(0.05,),
+    quantization_level_equal_prob=(4,),
+    quantization_level_max_min=(),
+    sigma_rate=(),
     out=None,
 ):
     """Populate *out* dict with symbolic dynamics indices (no HRV_ prefix)."""
