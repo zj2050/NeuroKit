@@ -203,7 +203,7 @@ def hrv_nonlinear(peaks, sampling_rate=1000, show=False, **kwargs):
 
     See Also
     --------
-    ecg_peaks, ppg_peaks, hrv_frequency, hrv_time, hrv_summary
+    ecg_peaks, ppg_peaks, hrv_frequency, hrv_time, hrv_summary, hrv_symbolic
 
     Examples
     --------
@@ -258,6 +258,13 @@ def hrv_nonlinear(peaks, sampling_rate=1000, show=False, **kwargs):
       R-R interval. Journal of the autonomic nervous system, 62(1-2), 79-84.
     * Acharya, R. U., Lim, C. M., & Joseph, P. (2002). Heart rate variability analysis using
       correlation dimension and detrended fluctuation analysis. Itbm-Rbm, 23(6), 333-339.
+    * Cysarz, D., Porta, A., Montano, N., van Leeuwen, P., Kurths, J., & Wessel, N. (2013).
+      Quantifying heart rate dynamics using different approaches of symbolic dynamics. Eur. Phys.
+      J. Spec. Top. 222, 487–500. doi: 10.1140/epjst/e2013-01854-7
+    * Porta, A., Tobaldini, E., Guzzetti, S., Furlan, R., Montano, N., & Gnecchi-Ruscone, T.
+      (2007). Assessment of cardiac autonomic modulation during graded head-up tilt by symbolic
+      analysis of heart rate variability. Am. J. Physiol. Heart Circ. Physiol. 293, H702–H708.
+      doi: 10.1152/ajpheart.00006.2007
 
     """
     # Sanitize input
@@ -275,13 +282,19 @@ def hrv_nonlinear(peaks, sampling_rate=1000, show=False, **kwargs):
     out = {}
 
     # Poincaré features (SD1, SD2, etc.)
-    out = _hrv_nonlinear_poincare(rri, rri_time=rri_time, rri_missing=rri_missing, out=out)
+    out = _hrv_nonlinear_poincare(
+        rri, rri_time=rri_time, rri_missing=rri_missing, out=out
+    )
 
     # Heart Rate Fragmentation
-    out = _hrv_nonlinear_fragmentation(rri, rri_time=rri_time, rri_missing=rri_missing, out=out)
+    out = _hrv_nonlinear_fragmentation(
+        rri, rri_time=rri_time, rri_missing=rri_missing, out=out
+    )
 
     # Heart Rate Asymmetry
-    out = _hrv_nonlinear_poincare_hra(rri, rri_time=rri_time, rri_missing=rri_missing, out=out)
+    out = _hrv_nonlinear_poincare_hra(
+        rri, rri_time=rri_time, rri_missing=rri_missing, out=out
+    )
 
     # DFA
     out = _hrv_dfa(rri, out, **kwargs)
@@ -292,14 +305,23 @@ def hrv_nonlinear(peaks, sampling_rate=1000, show=False, **kwargs):
     out["SampEn"], _ = entropy_sample(rri, delay=1, dimension=2, tolerance=tolerance)
     out["ShanEn"], _ = entropy_shannon(rri)
     out["FuzzyEn"], _ = entropy_fuzzy(rri, delay=1, dimension=2, tolerance=tolerance)
-    out["MSEn"], _ = entropy_multiscale(rri, dimension=2, tolerance=tolerance, method="MSEn")
-    out["CMSEn"], _ = entropy_multiscale(rri, dimension=2, tolerance=tolerance, method="CMSEn")
-    out["RCMSEn"], _ = entropy_multiscale(rri, dimension=2, tolerance=tolerance, method="RCMSEn")
+    out["MSEn"], _ = entropy_multiscale(
+        rri, dimension=2, tolerance=tolerance, method="MSEn"
+    )
+    out["CMSEn"], _ = entropy_multiscale(
+        rri, dimension=2, tolerance=tolerance, method="CMSEn"
+    )
+    out["RCMSEn"], _ = entropy_multiscale(
+        rri, dimension=2, tolerance=tolerance, method="RCMSEn"
+    )
 
     out["CD"], _ = fractal_correlation(rri, delay=1, dimension=2, **kwargs)
     out["HFD"], _ = fractal_higuchi(rri, k_max=10, **kwargs)
     out["KFD"], _ = fractal_katz(rri)
     out["LZC"], _ = complexity_lempelziv(rri, **kwargs)
+
+    # Symbolic dynamics
+    out = _hrv_symbolic_dynamics(rri, out=out)
 
     if show:
         _hrv_nonlinear_show(rri, rri_time=rri_time, rri_missing=rri_missing, out=out)
@@ -384,7 +406,9 @@ def _hrv_nonlinear_poincare_hra(rri, rri_time=None, rri_missing=False, out={}):
     dist_all = abs(y - x) / np.sqrt(2)
 
     # Calculate the angles
-    theta_all = abs(np.arctan(1) - np.arctan(y / x))  # phase angle LI - phase angle of i-th point
+    theta_all = abs(
+        np.arctan(1) - np.arctan(y / x)
+    )  # phase angle LI - phase angle of i-th point
     # Calculate the radius
     r = np.sqrt(x**2 + y**2)
     # Sector areas
@@ -501,8 +525,8 @@ def _hrv_dfa(rri, out, n_windows="default", **kwargs):
 
     # If the signal is too short, skip it
     if len(rri) < 12:
-        out['DFA_alpha1'] = np.nan
-        out['DFA_alpha2'] = np.nan
+        out["DFA_alpha1"] = np.nan
+        out["DFA_alpha2"] = np.nan
         return out
 
     dfa_windows = kwargs.get("dfa_windows", [(4, 11), (12, None)])
@@ -522,11 +546,17 @@ def _hrv_dfa(rri, out, n_windows="default", **kwargs):
         n_windows_long = n_windows[1]
 
     # Compute DFA alpha1
-    short_window = np.linspace(dfa_windows[0][0], dfa_windows[0][1], n_windows_short).astype(int)
+    short_window = np.linspace(
+        dfa_windows[0][0], dfa_windows[0][1], n_windows_short
+    ).astype(int)
     # For monofractal
-    out["DFA_alpha1"], _ = fractal_dfa(rri, multifractal=False, scale=short_window, **kwargs)
+    out["DFA_alpha1"], _ = fractal_dfa(
+        rri, multifractal=False, scale=short_window, **kwargs
+    )
     # For multifractal
-    mdfa_alpha1, _ = fractal_dfa(rri, multifractal=True, q=np.arange(-5, 6), scale=short_window, **kwargs)
+    mdfa_alpha1, _ = fractal_dfa(
+        rri, multifractal=True, q=np.arange(-5, 6), scale=short_window, **kwargs
+    )
     for k in mdfa_alpha1.columns:
         out["MFDFA_alpha1_" + k] = mdfa_alpha1[k].values[0]
 
@@ -542,11 +572,17 @@ def _hrv_dfa(rri, out, n_windows="default", **kwargs):
         )
         return out
     else:
-        long_window = np.linspace(dfa_windows[1][0], int(max_beats), n_windows_long).astype(int)
+        long_window = np.linspace(
+            dfa_windows[1][0], int(max_beats), n_windows_long
+        ).astype(int)
         # For monofractal
-        out["DFA_alpha2"], _ = fractal_dfa(rri, multifractal=False, scale=long_window, **kwargs)
+        out["DFA_alpha2"], _ = fractal_dfa(
+            rri, multifractal=False, scale=long_window, **kwargs
+        )
         # For multifractal
-        mdfa_alpha2, _ = fractal_dfa(rri, multifractal=True, q=np.arange(-5, 6), scale=long_window, **kwargs)
+        mdfa_alpha2, _ = fractal_dfa(
+            rri, multifractal=True, q=np.arange(-5, 6), scale=long_window, **kwargs
+        )
         for k in mdfa_alpha2.columns:
             out["MFDFA_alpha2_" + k] = mdfa_alpha2[k].values[0]
 
@@ -554,9 +590,215 @@ def _hrv_dfa(rri, out, n_windows="default", **kwargs):
 
 
 # =============================================================================
+# Symbolic Dynamics
+# =============================================================================
+def hrv_symbolic(
+    peaks,
+    sampling_rate=1000,
+    quantization_level_equal_prob=(4,),
+    quantization_level_max_min=(),
+    sigma_rate=(),
+):
+    """**Symbolic dynamics indices of Heart Rate Variability (HRV)**
+
+    Computes symbolic dynamics HRV indices based on three quantization methods: equal-probability,
+    max-min, and sigma. R-R intervals are converted to symbol sequences, and consecutive 3-symbol
+    words are classified into four variation families:
+
+    * **0V**: no variation — all three symbols equal.
+    * **1V**: one variation — exactly one adjacent pair differs.
+    * **2LV**: two like variations — all three differ and monotone (rising or falling).
+    * **2UV**: two unlike variations — all three differ and non-monotone (peak or valley, including
+      patterns like [a, b, a]).
+
+    Symbolic dynamics indices were developed to address limitations of both time-domain and
+    frequency-domain HRV methods, which assume stationarity and perform poorly on short or noisy
+    recordings. By coarse-graining the RR interval series into discrete symbols, the approach
+    captures nonlinear and non-stationary dynamics that linear methods miss, while remaining
+    computationally simple and interpretable. The variation families have clear physiological
+    correlates: 0V patterns (no variation) increase with sympathetic dominance, while 2V patterns
+    (high variation) increase with parasympathetic activity, a dissociation validated against
+    pharmacological autonomic blockade and head-up tilt protocols. Importantly, symbolic indices
+    track autonomic modulation even in short recordings of a few minutes where spectral LF/HF
+    ratios become unreliable. Proposed clinical and applied uses include monitoring autonomic
+    changes during postural stress, exercise, and sleep, assessing cardiac autonomic neuropathy,
+    and as a complement to entropy-based nonlinear indices. The three quantization methods
+    (equal-probability, max-min, sigma) differ in their sensitivity to distributional properties
+    of the RR series; equal-probability quantization has been generally recommended when comparing
+    across individuals or conditions, as it is invariant to the marginal distribution of RR
+    intervals.
+
+    The following parameterizations have been used in the literature:
+
+    * ``quantization_level_equal_prob=(4,)`` is the most common choice and is recommended for 
+      cross-subject comparisons due to its invariance to the RR interval distribution (Cysarz et 
+      al., 2018).
+    * ``quantization_level_equal_prob=(4, 6)`` together with ``quantization_level_max_min=(6,)``
+      and ``sigma_rate=(0.05,)`` allows direct comparison across all three quantization methods
+      at matched levels, as done in Cysarz et al. (2013).
+    * The sigma method with ``sigma_rate=0.05`` was used in the original autonomic blockade
+      validation work (Porta et al., 2007) and is the most physiologically interpreted variant,
+      with 0V linked to sympathetic and 2V to parasympathetic dominance.
+    * ``quantization_level_max_min=(6,)`` should generally be avoided for cross-subject
+      comparisons as it is sensitive to outliers in the RR series.
+
+    Parameters
+    ----------
+    peaks : dict or list
+        Samples at which cardiac extrema (e.g., R-peaks) occur. Can be a list of indices or a
+        dict containing the keys ``RRI`` and ``RRI_Time``.
+    sampling_rate : int, optional
+        Sampling rate (Hz) of the continuous cardiac signal in which the peaks occur. Default 1000.
+    quantization_level_equal_prob : tuple of int, optional
+        Quantization levels for the equal-probability method. Default ``(4,)`` (the most commonly
+        reported variant). Pass e.g. ``(4, 6)`` to include additional levels.
+    quantization_level_max_min : tuple of int, optional
+        Quantization levels for the max-min method. Default ``()`` (disabled). Pass e.g. ``(6,)``
+        to enable.
+    sigma_rate : tuple of float, optional
+        Sigma rates for the sigma method. Default ``()`` (disabled). Pass e.g. ``(0.05,)`` to
+        enable.
+
+    Returns
+    -------
+    DataFrame
+        Contains the HRV symbolic dynamics indices. Column names follow the pattern
+        ``HRV_SymDyn_{Method}{Level}_{Family}``, e.g.:
+
+        * **HRV_Symbolic_EqualProb4_0V / _1V / _2LV / _2UV** (default)
+        * **HRV_Symbolic_EqualProb6_0V / _1V / _2LV / _2UV** (if level 6 requested)
+        * **HRV_Symbolic_MaxMin6_0V / _1V / _2LV / _2UV** (if max-min enabled)
+        * **HRV_Symbolic_Sigma05_0V / _1V / _2LV / _2UV** (if sigma enabled; ``05`` = rate × 100)
+
+    See Also
+    --------
+    ecg_peaks, ppg_peaks, hrv_nonlinear, hrv_time, hrv_frequency, hrv_symbolic
+
+    Examples
+    --------
+    .. ipython:: python
+
+      import neurokit2 as nk
+
+      data = nk.data("bio_resting_5min_100hz")
+      peaks, info = nk.ecg_peaks(data["ECG"], sampling_rate=100)
+      hrv = nk.hrv_symbolic(peaks, sampling_rate=100)
+      hrv
+
+    References
+    ----------
+    * Cysarz, D., Edelhäuser, F., Javorka, M., Montano, N., & Porta, A. (2018). On the relevance
+      of symbolizing heart rate variability by means of a percentile-based coarse graining approach.
+      Physiol. Meas. 39:105010. doi: 10.1088/1361-6579/aae302
+    * Cysarz, D., Porta, A., Montano, N., van Leeuwen, P., Kurths, J., & Wessel, N. (2013).
+      Quantifying heart rate dynamics using different approaches of symbolic dynamics. Eur. Phys.
+      J. Spec. Top. 222, 487–500. doi: 10.1140/epjst/e2013-01854-7
+    * Wessel, N., Malberg, H., Bauernschmitt, R., & Kurths, J. (2007). Nonlinear methods of
+      cardiovascular physics and their clinical applicability. Int. J. Bifurc. Chaos 17, 3325–3371.
+      doi: 10.1142/s0218127407019093
+    * Porta, A., Tobaldini, E., Guzzetti, S., Furlan, R., Montano, N., & Gnecchi-Ruscone, T.
+      (2007). Assessment of cardiac autonomic modulation during graded head-up tilt by symbolic
+      analysis of heart rate variability. Am. J. Physiol. Heart Circ. Physiol. 293, H702–H708.
+      doi: 10.1152/ajpheart.00006.2007
+
+    """
+    rri, _, _ = _hrv_format_input(peaks, sampling_rate=sampling_rate)
+    out = _hrv_symbolic_dynamics(
+        rri,
+        quantization_level_equal_prob=quantization_level_equal_prob,
+        quantization_level_max_min=quantization_level_max_min,
+        sigma_rate=sigma_rate,
+    )
+    return pd.DataFrame.from_dict(out, orient="index").T.add_prefix("HRV_")
+
+
+def _hrv_symbolic_dynamics(
+    rri,
+    quantization_level_equal_prob=(4,),
+    quantization_level_max_min=(),
+    sigma_rate=(),
+    out=None,
+):
+    """Populate *out* dict with symbolic dynamics indices (no HRV_ prefix)."""
+    if out is None:
+        out = {}
+    for ql in quantization_level_equal_prob:
+        for k, v in _hrv_symbolic_equal_prob(rri, ql).items():
+            out[f"Symbolic_EqualProb{ql}_{k}"] = v
+    for ql in quantization_level_max_min:
+        for k, v in _hrv_symbolic_max_min(rri, ql).items():
+            out[f"Symbolic_MaxMin{ql}_{k}"] = v
+    for sr in sigma_rate:
+        label = str(round(sr * 100)).zfill(2)
+        for k, v in _hrv_symbolic_sigma(rri, sr).items():
+            out[f"Symbolic_Sigma{label}_{k}"] = v
+    return out
+
+
+def _hrv_symbolic_classify(words):
+    """Classify 3-symbol words into 0V / 1V / 2LV / 2UV families.
+
+    * **0V**: ``a == b == c`` — no variation.
+    * **1V**: ``(a==b, b!=c)`` or ``(a!=b, b==c)`` — exactly one adjacent change.
+    * **2LV**: ``a!=b``, ``b!=c``, and monotone — two like variations.
+    * **2UV**: ``a!=b``, ``b!=c``, and non-monotone — two unlike variations.
+      This correctly includes patterns such as ``[a, b, a]`` (peak or valley) which have
+      two unique values but two variations, not one.
+    """
+    words = np.asarray(words)
+    a, b, c = words[:, 0], words[:, 1], words[:, 2]
+    two_changes = (a != b) & (b != c)
+    monotone = ((a < b) & (b < c)) | ((a > b) & (b > c))
+    n = len(words)
+    return {
+        "0V": float(np.sum((a == b) & (b == c))) / n,
+        "1V": float(np.sum(((a == b) & (b != c)) | ((a != b) & (b == c)))) / n,
+        "2LV": float(np.sum(two_changes & monotone)) / n,
+        "2UV": float(np.sum(two_changes & ~monotone)) / n,
+    }
+
+
+def _hrv_symbolic_equal_prob(rri, quantization_level=4):
+    """Quantize RRI by equal-probability percentile bins."""
+    percentiles = np.linspace(0, 100, quantization_level + 1)
+    pv = np.percentile(rri, percentiles)
+    symbols = np.clip(np.digitize(rri, pv, right=False) - 1, 0, quantization_level - 1)
+    words = [symbols[i : i + 3] for i in range(len(symbols) - 2)]
+    return _hrv_symbolic_classify(words)
+
+
+def _hrv_symbolic_max_min(rri, quantization_level=6):
+    """Quantize RRI into uniform bins between signal min and max."""
+    thresholds = np.linspace(rri.min(), rri.max(), quantization_level + 1)[1:-1]
+    symbols = np.digitize(rri, thresholds)
+    words = [symbols[i : i + 3] for i in range(len(symbols) - 2)]
+    return _hrv_symbolic_classify(words)
+
+
+def _hrv_symbolic_sigma(rri, sigma_rate=0.05):
+    """Quantize RRI by deviation from the mean, scaled by sigma_rate."""
+    mu = np.mean(rri)
+    symbols = np.zeros(len(rri), dtype=int)
+    symbols[rri > (1 + sigma_rate) * mu] = 0
+    symbols[(mu < rri) & (rri <= (1 + sigma_rate) * mu)] = 1
+    symbols[(rri <= mu) & (rri > (1 - sigma_rate) * mu)] = 2
+    symbols[rri <= (1 - sigma_rate) * mu] = 3
+    words = [symbols[i : i + 3] for i in range(len(symbols) - 2)]
+    return _hrv_symbolic_classify(words)
+
+
+# =============================================================================
 # Plot
 # =============================================================================
-def _hrv_nonlinear_show(rri, rri_time=None, rri_missing=False, out={}, ax=None, ax_marg_x=None, ax_marg_y=None):
+def _hrv_nonlinear_show(
+    rri,
+    rri_time=None,
+    rri_missing=False,
+    out={},
+    ax=None,
+    ax_marg_x=None,
+    ax_marg_y=None,
+):
 
     mean_heart_period = np.nanmean(rri)
     sd1 = out["SD1"]
@@ -609,7 +851,14 @@ def _hrv_nonlinear_show(rri, rri_time=None, rri_missing=False, out={}, ax=None, 
     ax.imshow(np.rot90(f), extent=[ax1_min, ax1_max, ax2_min, ax2_max], aspect="auto")
 
     # Marginal densities
-    ax_marg_x.hist(ax1, bins=int(len(ax1) / 10), density=True, alpha=1, color="#ccdff0", edgecolor="none")
+    ax_marg_x.hist(
+        ax1,
+        bins=int(len(ax1) / 10),
+        density=True,
+        alpha=1,
+        color="#ccdff0",
+        edgecolor="none",
+    )
     ax_marg_y.hist(
         ax2,
         bins=int(len(ax2) / 10),
@@ -624,11 +873,21 @@ def _hrv_nonlinear_show(rri, rri_time=None, rri_missing=False, out={}, ax=None, 
     x1_plot = np.linspace(ax1_min, ax1_max, len(ax1))
     x1_dens = kde1.evaluate(x1_plot)
 
-    ax_marg_x.fill(x1_plot, x1_dens, facecolor="none", edgecolor="#1b6aaf", alpha=0.8, linewidth=2)
+    ax_marg_x.fill(
+        x1_plot, x1_dens, facecolor="none", edgecolor="#1b6aaf", alpha=0.8, linewidth=2
+    )
     kde2 = scipy.stats.gaussian_kde(ax2)
     x2_plot = np.linspace(ax2_min, ax2_max, len(ax2))
     x2_dens = kde2.evaluate(x2_plot)
-    ax_marg_y.fill_betweenx(x2_plot, x2_dens, facecolor="none", edgecolor="#1b6aaf", linewidth=2, alpha=0.8, zorder=2)
+    ax_marg_y.fill_betweenx(
+        x2_plot,
+        x2_dens,
+        facecolor="none",
+        edgecolor="#1b6aaf",
+        linewidth=2,
+        alpha=0.8,
+        zorder=2,
+    )
 
     # Turn off marginal axes labels
     ax_marg_x.axis("off")
@@ -639,7 +898,9 @@ def _hrv_nonlinear_show(rri, rri_time=None, rri_missing=False, out={}, ax=None, 
     width = 2 * sd2 + 1
     height = 2 * sd1 + 1
     xy = (mean_heart_period, mean_heart_period)
-    ellipse = matplotlib.patches.Ellipse(xy=xy, width=width, height=height, angle=angle, linewidth=2, fill=False)
+    ellipse = matplotlib.patches.Ellipse(
+        xy=xy, width=width, height=height, angle=angle, linewidth=2, fill=False
+    )
     ellipse.set_alpha(0.5)
     ellipse.set_facecolor("#2196F3")
     ax.add_patch(ellipse)
