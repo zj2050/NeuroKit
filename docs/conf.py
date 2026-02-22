@@ -8,15 +8,30 @@
 # pip install sphinx-material
 # pip install sphinxemoji
 
+import asyncio
 import datetime
+import importlib.metadata
 import os
+import platform
 import re
 import sys
-import asyncio
-import platform
+
 import matplotlib
 
-matplotlib.use("Agg")
+
+matplotlib.use("agg")
+
+ipython_warning_is_error = False
+
+# Provide a clean "boot" sequence for every worker process.
+# This ensures each core starts with the same imports without "fighting."
+ipython_execlines = [
+    "import mne",
+    "import numpy as np",
+    "import pandas as pd",
+    "import matplotlib.pyplot as plt",
+    "import neurokit2 as nk",
+]
 # -- Path setup --------------------------------------------------------------
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -39,22 +54,18 @@ def find_author():
 
 project = "NeuroKit2"
 copyright = f"2020–{datetime.datetime.now().year}"
-author = '<a href="https://dominiquemakowski.github.io/">Dominique Makowski</a> and the <a href="https://github.com/neuropsychology/NeuroKit/blob/master/AUTHORS.rst">Team</a>. This documentation is licensed under a <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> license.'
+author = (
+    '<a href="https://dominiquemakowski.github.io/">Dominique Makowski</a> '
+    'and the <a href="https://github.com/neuropsychology/NeuroKit/blob/master/AUTHORS.rst">Team</a>. '
+    "This documentation is licensed under a "
+    '<a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> license.'
+)
 
 
-# The short X.Y version.
-def find_version():
-    result = re.search(
-        r'{}\s*=\s*[\'"]([^\'"]*)[\'"]'.format("__version__"),
-        open("../neurokit2/__init__.py").read(),
-    )
-    return result.group(1)
-
-
-version = find_version()
-# The full version, including alpha/beta/rc tags.
-release = version
-
+try:
+    release = importlib.metadata.version("neurokit2")
+except importlib.metadata.PackageNotFoundError:
+    release = "DEV"
 
 # -- General configuration ---------------------------------------------------
 
@@ -97,9 +108,7 @@ napoleon_numpy_docstring = True
 napoleon_use_param = False
 napoleon_use_ivar = False
 napoleon_use_rtype = False
-add_module_names = (
-    False  # If true, the current module name will be prepended to all description
-)
+add_module_names = False  # If true, the current module name will be prepended to all description
 
 # -- Options for ipython directive  ----------------------------------------
 
@@ -146,4 +155,4 @@ html_theme_options = {
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
+# html_static_path = ["_static"]

@@ -65,32 +65,136 @@ Also, when you create a **new branch**, consider naming it with a pattern corres
 - ``[Docs]`` typos, documentation and new articles.
 - ``[Change]`` changes in args, names, functions etc (often breaking changes).
 - ``[Improvement]`` refining of code, efficiency improvements etc.
+- ``[Maintenance]`` updating CI/CD or other maintainer related change
 
 
-Run code checks
-^^^^^^^^^^^^^^^^^^^^
+Setting up your environment
+----------------------------
 
-Once you're satisfied by the code you've written, you will need to run some checks to make sure it is up-to-standards. These checks will be run automatically when you open a PR, so you might want to run them locally if you to fix things upfront.
+We use a development script, ``dev.py``, to simplify environment setup. While you can use standard Python, we strongly recommend using `uv <https://docs.astral.sh/uv/>`_ for faster and more reliable dependency management.
+Beyond speed, **uv** can automatically manage Python versions for you. If you want to test your code updates against different supported python versions, ``uv`` will download and use it automatically without interfering with your global settings.
 
-You will need to open the command line and install the following packages:
+**Method 1: Using uv (Recommended)**
 
-.. code-block::
+.. code-block:: bash
 
-    pip install isort black docformatter flake8 pylint
+    # Clone and enter the repository
+    git clone https://github.com/neuropsychology/NeuroKit
+    cd NeuroKit
 
-Now, navigate to the folder where your script is by typing ``cd C:\the\folder\of\my\file``. Once you there, you can run the following commands:
+    # Setup environment and git hooks
+    uv sync --all-groups --all-extras
+    uv run pre-commit install
 
-.. code-block::
+**Method 2: Using pip**
 
-    isort myfile.py -l 120  --balanced --multi-line 3 --lines-between-types 1 --lines-after-imports 2 --trailing-comma
-    black myfile.py --line-length 120
-    docformatter myfile.py --wrap-summaries 120 --wrap-descriptions 113 --blank --in-place
+.. code-block:: bash
 
-    flake8 myfile.py --max-line-length=127 --max-complexity=10 --ignore E303,C901,E203,W503
-    pylint myfile.py --max-line-length=127 --load-plugins=pylint.extensions.docparams --load-plugins=pylint.extensions.docstyle --variable-naming-style=any --argument-naming-style=any --reports=n --suggestion-mode=y --disable=E303 --disable=R0913 --disable=R0801 --disable=C0114 --disable=E203 --disable=E0401 --disable=W9006 --disable=C0330 --disable=R0914 --disable=R0912 --disable=R0915 --disable=W0102 --disable=W0511 --disable=C1801 --disable=C0111 --disable=R1705 --disable=R1720 --disable=C0301 --disable=C0415 --disable=C0103 --disable=C0302 --disable=R1716 --disable=W0632 --disable=E1136 --extension-pkg-whitelist=numpy
+    git clone https://github.com/neuropsychology/NeuroKit
+    cd NeuroKit
+
+    # Create and activate a virtual environment
+    python -m venv .venv
+    source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+    # Install package and hooks
+    pip install -e ".[dev]"
+    pre-commit install
+
+.. tip::
+
+    You can also simply run ``python dev.py setup``. This script automatically detects if you have ``uv`` (default) or ``pip`` and configures the environment for you.
 
 
-The first three commands will make some modifications to your code so that it is nicely formatted, while the two last will run some checks to detect any additional issues. Please try to fix them!
+Integrations with an IDE (VSCode / VSCodium)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To ensure linting and autocompletion work correctly, point your editor to the project's virtual environment:
+
+1. Open the NeuroKit folder in VSCode.
+2. Open the **Command Palette** (``Ctrl+Shift+P``).
+3. Search for **"Python: Select Interpreter"**.
+4. Select the interpreter located within the ``.venv`` folder.
+
+
+Development CLI (dev.py)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Instead of remembering complex flags, use the ``dev.py`` script for common development tasks.
+
++------------------------------+-------------------------------------------------------+
+| Command                      | Description                                           |
++==============================+=======================================================+
+| ``python dev.py setup``      | Install dependencies and git hooks automatically.     |
++------------------------------+-------------------------------------------------------+
+| ``python dev.py test``       | Run the test suite via pytest.                        |
++------------------------------+-------------------------------------------------------+
+| ``python dev.py lint``       | Check code style and errors using Ruff.               |
++------------------------------+-------------------------------------------------------+
+| ``python dev.py format``     | Check code formatting violations using Ruff.          |
++------------------------------+-------------------------------------------------------+
+| ``python dev.py docs``       | Build the HTML documentation.                         |
++------------------------------+-------------------------------------------------------+
+| ``python dev.py docs-serve`` | Preview the documentation at http://localhost:8000.   |
++------------------------------+-------------------------------------------------------+
+| ``python dev.py docs-clean`` | Remove documentation build artifacts.                 |
++------------------------------+-------------------------------------------------------+
+
+
+Pre-commit Hooks (Automatic Formatting)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The easiest way to contribute clean code is to let the automated hooks handle it. When you run the ``setup`` command, **pre-commit** hooks are installed in your local repository.
+
+Every time you run ``git commit``, the hooks automatically run **Ruff** (our linter and formatter) **only on the files you changed**.
+
+* **Automatic Fixes:** If the hooks find minor issues (like improper spacing or unsorted imports), they will fix them automatically.
+* **The "Fail-to-Fix" Loop:** If a hook fixes something, the commit will be blocked. Don't worry! This is normal. Simply "stage" the changes the hook just made (``git add .``) and commit again.
+* **Why we do this:** This ensures that we gradually improve the code style of the repository without creating massive, unrelated changes in your Pull Request.
+
+
+Code Quality & Health Checks
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The ``dev.py`` script is intended for **checking the status** of the repository. Unlike the pre-commit hooks, these commands do not modify your code; they simply report its current state.
+
+To check if the entire repository complies with our linting and formatting rules, use:
+
+.. code-block:: bash
+
+    # Check for linting errors/logic issues across the repo
+    python dev.py lint
+
+    # Check if files are correctly formatted
+    python dev.py format
+
+If these commands report errors in your modified files, **please rely on the pre-commit workflow** to resolve them. Simply staging your files (``git add``) and attempting a commit will allow the hooks to fix the issues automatically. We discourage manual global formatting to keep Pull Requests focused and small.
+
+.. tip::
+
+    These global commands are "read-only" to prevent accidental, massive reformatting of the entire library. We prefer small, targeted Pull Requests that only change the files relevant to your feature or bug fix.
+
+
+Running Tests
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Before pushing changes, verify that the package still works as expected:
+
+.. code-block:: bash
+
+    python dev.py test
+
+If you are using ``uv``, you can also run ``uv run pytest``. Ensure all tests pass (indicated by green text) before submitting your contribution.
+
+
+Documentation Builder
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you have modified docstrings or created new tutorials, build the documentation locally to preview the results:
+
+1. **Build:** ``python dev.py docs``
+2. **View:** ``python dev.py docs-serve`` (Access via your browser at localhost:8000)
+3. **Clean:** If you encounter build errors or stale files, run ``python dev.py docs-clean``.
 
 
 Development workflow
@@ -350,5 +454,3 @@ If you want to add images to an `.rst` file, best is to put them in the `/docs/i
 However, in order for this file to be easily **accessible from the website**, you also need to add it to the **table of content** located in the `index <https://github.com/neuropsychology/NeuroKit/blob/master/docs/examples/index.rst>`_ file (just add the name of the file without the extension).
 
 Do not hesitate to ask for more info by creating an `issue <https://github.com/neuropsychology/NeuroKit/issues>`_!
-
-

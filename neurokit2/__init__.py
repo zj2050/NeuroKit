@@ -32,8 +32,10 @@ from .signal import *
 from .stats import *
 from .video import *
 
-# Info
-__version__ = "0.2.13"
+try:
+    from ._version import __version__
+except ImportError:
+    __version__ = "999"
 
 
 # Maintainer info
