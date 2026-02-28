@@ -28,6 +28,9 @@ jobs:
         needs: build
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         runs-on: ubuntu-latest
+        environment:
+            name: testpypi
+            url: https://test.pypi.org/p/neurokit2
         steps:
             - uses: actions/checkout@v4
             - uses: astral-sh/setup-uv@v5
