@@ -14,8 +14,14 @@ permissions:
 jobs:
     build-and-deploy:
         runs-on: ubuntu-latest
+
+        environment:
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
+
         env:
             MNE_DATA: ${{ github.workspace }}/mne_data
+
         steps:
             - name: Checkout Code
               uses: actions/checkout@v4
